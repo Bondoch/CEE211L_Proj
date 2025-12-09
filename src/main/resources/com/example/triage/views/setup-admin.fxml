@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.triage.controllers.SetupAdminController"
+            prefHeight="400.0" prefWidth="600.0">
+
+    <children>
+        <VBox alignment="CENTER" spacing="15" layoutX="200" layoutY="120">
+
+            <Text text="Initial Administrator Setup"
+                  style="-fx-font-size: 24px; -fx-font-weight: bold;" />
+
+            <TextField fx:id="usernameField" promptText="Admin Username" prefWidth="300" />
+            <PasswordField fx:id="passwordField" promptText="Password" prefWidth="300" />
+            <PasswordField fx:id="confirmField" promptText="Confirm Password" prefWidth="300" />
+
+            <Button text="Create Admin Account"
+                    onAction="#handleCreateAdmin"
+                    prefWidth="200" />
+
+            <Label fx:id="errorLabel" textFill="red" />
+        </VBox>
+    </children>
+
+</AnchorPane>
