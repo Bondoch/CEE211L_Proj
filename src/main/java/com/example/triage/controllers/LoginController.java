@@ -1,14 +1,17 @@
 package com.example.triage.controllers;
 
-
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import com.example.triage.database.DBConnection;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import com.example.triage.database.DBConnection;
+import javafx.scene.control.Label;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import javafx.scene.control.Label;
 
 public class LoginController {
 
@@ -26,8 +29,7 @@ public class LoginController {
         String username = usernameField.getText();
         String password = passwordField.getText();
 
-        // Clear previous messages
-        errorLabel.setText("");
+        errorLabel.setText(""); // Clear older error messages
 
         if (username.isEmpty() || password.isEmpty()) {
             errorLabel.setText("Please enter both username and password.");
@@ -35,13 +37,14 @@ public class LoginController {
         }
 
         if (authenticateUser(username, password)) {
-            errorLabel.setText(""); // Clear any error
             System.out.println("Login successful!");
-            // TODO: Redirect to dashboard here
+
+            loadDashboard();
         } else {
             errorLabel.setText("Invalid username or password.");
         }
     }
+
     private boolean authenticateUser(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
 
@@ -53,11 +56,26 @@ public class LoginController {
 
             ResultSet rs = stmt.executeQuery();
 
-            return rs.next(); // returns true if a matching user is found
+            return rs.next(); // True = login successful
 
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    private void loadDashboard() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/triage/views/dashboard.fxml"));
+            Scene dashboardScene = new Scene(loader.load(), 900, 600);
+
+            // Get current stage
+            Stage stage = (Stage) usernameField.getScene().getWindow();
+            stage.setTitle("Dashboard");
+            stage.setScene(dashboardScene);
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
