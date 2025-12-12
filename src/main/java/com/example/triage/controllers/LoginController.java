@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
+
 
 public class LoginController {
 
@@ -65,14 +68,30 @@ public class LoginController {
     }
 
     private void loadDashboard() {
+        FadeTransition fade = new FadeTransition(Duration.millis(300), usernameField.getScene().getRoot());
+        fade.setFromValue(1.0);
+        fade.setToValue(0.0);
+
+        fade.setOnFinished(event -> {
+            showDashboard();
+        });
+
+        fade.play();
+    }
+
+    private void showDashboard() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/triage/views/dashboard.fxml"));
             Scene dashboardScene = new Scene(loader.load(), 900, 600);
 
-            // Get current stage
             Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.setTitle("Dashboard");
             stage.setScene(dashboardScene);
+
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(300), dashboardScene.getRoot());
+            fadeIn.setFromValue(0.0);
+            fadeIn.setToValue(1.0);
+            fadeIn.play();
 
         } catch (IOException e) {
             e.printStackTrace();

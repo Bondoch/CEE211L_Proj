@@ -1,29 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.text.Text?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.triage.controllers.LoginController"
-            prefHeight="400.0" prefWidth="600.0">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.triage.controllers.LoginController">
 
     <children>
 
-        <VBox alignment="CENTER" spacing="15" layoutX="250" layoutY="150">
+        <VBox alignment="CENTER" layoutX="23.0" layoutY="43.0" spacing="15">
 
-            <Text text="Triage System Login" style="-fx-font-size: 28px; -fx-font-weight: bold;" />
+            <Text style="-fx-font-size: 28px; -fx-font-weight: bold;" text="Triage System Login" />
 
-            <TextField fx:id="usernameField" promptText="Username" prefWidth="300" />
-            <PasswordField fx:id="passwordField" promptText="Password" prefWidth="300" />
+            <TextField fx:id="usernameField" prefWidth="300" promptText="Username" />
+            <PasswordField fx:id="passwordField" prefWidth="300" promptText="Password" />
 
-            <Button fx:id="loginButton" text="Login" prefWidth="150" onAction="#onLoginButtonClick" />
+            <Button fx:id="loginButton" onAction="#onLoginButtonClick" prefWidth="150" text="Login" />
 
-            <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 14px;" />
+            <Label fx:id="errorLabel" style="-fx-font-size: 14px;" textFill="red" />
 
         </VBox>
 

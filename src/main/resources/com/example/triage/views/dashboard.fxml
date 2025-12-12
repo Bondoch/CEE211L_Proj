@@ -1,19 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.triage.controllers.DashboardController"
             prefWidth="900" prefHeight="600">
 
-    <children>
+    <!-- ========== TOP BAR ========== -->
+    <HBox prefHeight="50" prefWidth="900"
+          style="-fx-background-color: #34495E;">
+        <Button fx:id="menuButton"
+                style="-fx-background-color: transparent;">
+            <graphic>
+                <FontIcon iconLiteral="fas-bars" iconSize="24" iconColor="white"/>
+            </graphic>
+        </Button>
         <Label text="Dashboard"
-               layoutX="20" layoutY="20"
-               style="-fx-font-size: 32px; -fx-font-weight: bold;"/>
-    </children>
+               style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"
+               layoutX="60" layoutY="15"/>
+    </HBox>
+
+    <!-- ========== MAIN CONTENT AREA (BELOW SIDEBAR) ========== -->
+    <AnchorPane fx:id="contentArea"
+                layoutY="50"
+                prefWidth="900" prefHeight="550"
+                style="-fx-background-color: #ECF0F1;" />
+
+    <!-- ========== DARK OVERLAY (ABOVE CONTENT, BELOW SIDEBAR) ========== -->
+    <Pane fx:id="overlay"
+          layoutY="50"
+          prefWidth="900" prefHeight="550"
+          visible="false"
+          style="-fx-background-color: rgba(0, 0, 0, 0.4);" />
+
+    <!-- ========== SIDEBAR (TOPMOST LAYER) ========== -->
+    <VBox fx:id="sidebar"
+          prefWidth="200" prefHeight="600"
+          layoutX="-200" layoutY="50"
+          spacing="20"
+          style="-fx-background-color: #2C3E50; -fx-padding: 20;">
+
+        <Label text="Menu"
+               style="-fx-text-fill: white; -fx-font-size: 22px; -fx-font-weight: bold;" />
+
+        <Button text="Dashboard" fx:id="btnDashboard" prefWidth="160" />
+        <Button text="Patients" fx:id="btnPatients" prefWidth="160" />
+        <Button text="Facilities" fx:id="btnFacilities" prefWidth="160" />
+        <Button text="Staff Accounts" fx:id="btnStaff" prefWidth="160" />
+        <Button text="Settings" fx:id="btnSettings" prefWidth="160" />
+
+    </VBox>
 
 </AnchorPane>
