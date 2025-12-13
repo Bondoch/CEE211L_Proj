@@ -1,26 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.triage.controllers.LoginController">
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.triage.controllers.LoginController"
+            prefWidth="1000" prefHeight="650"
+            style="-fx-background-color: #E9F2FA;"> <!-- soft subtle blue -->
 
-    <children>
+    <!-- LEFT LOGIN SECTION -->
+    <VBox layoutX="80" layoutY="120" spacing="25">
 
-        <VBox alignment="CENTER" layoutX="23.0" layoutY="43.0" spacing="15">
+        <!-- TITLE -->
+        <Text text="Triage System Login"
+              style="-fx-font-size: 32px;
+                     -fx-font-weight: bold;
+                     -fx-fill: #034C81;" />  <!-- Navy blue -->
 
-            <Text style="-fx-font-size: 28px; -fx-font-weight: bold;" text="Triage System Login" />
+        <!-- LOGIN CARD -->
+        <VBox spacing="18"
+              style="-fx-background-color: #FFFFFF;
+                     -fx-background-radius: 10;
+                     -fx-border-radius: 10;
+                     -fx-border-color: #034C81;   /* navy border */
+                     -fx-border-width: 0 0 0 5;   /* left accent bar */
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0, 0, 4);">
 
-            <TextField fx:id="usernameField" prefWidth="300" promptText="Username" />
-            <PasswordField fx:id="passwordField" prefWidth="300" promptText="Password" />
+            <padding>
+                <Insets top="25" right="25" bottom="25" left="25"/>
+            </padding>
 
-            <Button fx:id="loginButton" onAction="#onLoginButtonClick" prefWidth="150" text="Login" />
+            <!-- USERNAME -->
+            <TextField fx:id="usernameField"
+                       promptText="Username"
+                       prefHeight="40" maxWidth="300"
+                       style="-fx-background-color: #F7F7F7;
+                              -fx-border-color: #7F858C;
+                              -fx-border-radius: 6;
+                              -fx-background-radius: 6;" />
 
-            <Label fx:id="errorLabel" style="-fx-font-size: 14px;" textFill="red" />
+            <!-- PASSWORD -->
+            <PasswordField fx:id="passwordField"
+                           promptText="Password"
+                           prefHeight="40" maxWidth="300"
+                           style="-fx-background-color: #F7F7F7;
+                                  -fx-border-color: #7F858C;
+                                  -fx-border-radius: 6;
+                                  -fx-background-radius: 6;" />
+
+            <!-- LOGIN BUTTON -->
+            <Button text="Login"
+                    onAction="#onLoginButtonClick"
+                    prefWidth="160" prefHeight="45"
+                    style="-fx-background-color: #2CA3FA;
+                           -fx-text-fill: white;
+                           -fx-font-size: 16px;
+                           -fx-font-weight: bold;
+                           -fx-background-radius: 8;" />
+
+            <!-- ERROR LABEL -->
+            <Label fx:id="errorLabel"
+                   textFill="#D9534F"
+                   style="-fx-font-size: 14px;" />
 
         </VBox>
 
-    </children>
+    </VBox>
 
 </AnchorPane>

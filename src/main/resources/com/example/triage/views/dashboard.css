@@ -1,0 +1,37 @@
+.menu-button {
+    -fx-background-color: #6fa8ff;
+    -fx-text-fill: black;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.menu-button:hover {
+    -fx-background-color: #8fbaff;
+}
+
+.menu-button-selected {
+    -fx-background-color: #4d90ff;
+    -fx-text-fill: black;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-effect: innershadow(gaussian, rgba(0,0,0,0.3), 8,0,2,2);
+}
+.menu-item {
+    -fx-padding: 12;
+    -fx-background-color: transparent;
+}
+
+.menu-item:hover {
+    -fx-background-color: #3E5871; /* hover color */
+    -fx-cursor: hand;
+}
+
+.menu-text {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.active {
+    -fx-background-color: #51708A; /* active highlight */
+}
