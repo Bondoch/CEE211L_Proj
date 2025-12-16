@@ -6,6 +6,7 @@ import com.example.triage.database.DBConnection;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import java.io.IOException;
@@ -13,8 +14,9 @@ import java.sql.ResultSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
+import javafx.animation.ParallelTransition;
 import javafx.util.Duration;
-
 
 public class LoginController {
 
@@ -28,23 +30,31 @@ public class LoginController {
     private Label errorLabel;
 
     @FXML
+    private HBox errorContainer;
+
+    @FXML
     private void onLoginButtonClick() {
-        String username = usernameField.getText();
+        String username = usernameField.getText().trim();
         String password = passwordField.getText();
 
-        errorLabel.setText(""); // Clear older error messages
+        // Clear previous errors
+        hideError();
 
+        // Validation
         if (username.isEmpty() || password.isEmpty()) {
-            errorLabel.setText("Please enter both username and password.");
+            showError("Please enter both username and password.");
             return;
         }
 
+        // Authenticate
         if (authenticateUser(username, password)) {
-            System.out.println("Login successful!");
-
+            System.out.println("Login successful for user: " + username);
             loadDashboard();
         } else {
-            errorLabel.setText("Invalid username or password.");
+            showError("Invalid username or password. Please try again.");
+
+            // Shake animation for wrong credentials
+            shakeFields();
         }
     }
 
@@ -63,6 +73,7 @@ public class LoginController {
 
         } catch (Exception e) {
             e.printStackTrace();
+            showError("Database connection error. Please contact IT support.");
             return false;
         }
     }
@@ -85,7 +96,7 @@ public class LoginController {
             Scene dashboardScene = new Scene(loader.load(), 900, 600);
 
             Stage stage = (Stage) usernameField.getScene().getWindow();
-            stage.setTitle("Dashboard");
+            stage.setTitle("Dashboard - LifeLine Triage System");
             stage.setScene(dashboardScene);
 
             FadeTransition fadeIn = new FadeTransition(Duration.millis(300), dashboardScene.getRoot());
@@ -95,6 +106,65 @@ public class LoginController {
 
         } catch (IOException e) {
             e.printStackTrace();
+            showError("Failed to load dashboard. Please restart the application.");
         }
+    }
+
+    // ========================================
+    // ERROR HANDLING METHODS
+    // ========================================
+
+    private void showError(String message) {
+        if (errorContainer != null) {
+            errorContainer.setVisible(true);
+            errorContainer.setManaged(true);
+            errorLabel.setText(message);
+
+            // Fade in animation
+            FadeTransition fadeIn = new FadeTransition(Duration.millis(200), errorContainer);
+            fadeIn.setFromValue(0.0);
+            fadeIn.setToValue(1.0);
+            fadeIn.play();
+        } else {
+            // Fallback if errorContainer is not defined
+            errorLabel.setText(message);
+        }
+    }
+
+    private void hideError() {
+        if (errorContainer != null) {
+            errorContainer.setVisible(false);
+            errorContainer.setManaged(false);
+        }
+        errorLabel.setText("");
+    }
+
+    // ========================================
+    // UI FEEDBACK ANIMATIONS
+    // ========================================
+
+    private void shakeFields() {
+        // Shake animation for visual feedback on wrong credentials
+        TranslateTransition shake = new TranslateTransition(Duration.millis(50), usernameField.getParent());
+        shake.setFromX(0);
+        shake.setCycleCount(4);
+        shake.setAutoReverse(true);
+        shake.setByX(10);
+        shake.play();
+    }
+
+    // ========================================
+    // OPTIONAL: ENTER KEY SUPPORT
+    // ========================================
+
+    @FXML
+    public void initialize() {
+        // Allow Enter key to submit from password field
+        if (passwordField != null) {
+            passwordField.setOnAction(event -> onLoginButtonClick());
+        }
+
+        // Hide error container initially
+        hideError();
     }
 }

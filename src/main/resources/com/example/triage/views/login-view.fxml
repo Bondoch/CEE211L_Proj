@@ -4,70 +4,201 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
+<?import javafx.scene.shape.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.triage.controllers.LoginController"
-            prefWidth="1000" prefHeight="650"
-            style="-fx-background-color: #E9F2FA;"> <!-- soft subtle blue -->
+            prefWidth="1200" prefHeight="700"
+            style="-fx-background-color: #FFFFFF;">
 
-    <!-- LEFT LOGIN SECTION -->
-    <VBox layoutX="80" layoutY="120" spacing="25">
+    <!-- ========== LEFT SIDE: BRANDING/VISUAL ========== -->
+    <AnchorPane prefWidth="600" prefHeight="700"
+                style="-fx-background-color: linear-gradient(to bottom, #034c81, #2ca3fa);
+                       -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 5, 0);">
 
-        <!-- TITLE -->
-        <Text text="Triage System Login"
-              style="-fx-font-size: 32px;
-                     -fx-font-weight: bold;
-                     -fx-fill: #034C81;" />  <!-- Navy blue -->
+        <!-- Medical Cross Icon -->
+        <StackPane layoutX="200" layoutY="180">
+            <Circle radius="80" fill="#FFFFFF" opacity="0.15"/>
+            <FontIcon iconLiteral="fas-plus" iconSize="100" iconColor="#FFFFFF" opacity="0.9"/>
+        </StackPane>
 
-        <!-- LOGIN CARD -->
-        <VBox spacing="18"
+        <!-- System Name -->
+        <VBox layoutX="100" layoutY="340" spacing="15" alignment="CENTER_LEFT">
+            <Text text="LifeLine"
+                  style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-fill: #FFFFFF;">
+                <font><Font name="System Bold" size="48"/></font>
+            </Text>
+            <Text text="Triage Management System"
+                  style="-fx-font-size: 20px; -fx-fill: #FFFFFF; -fx-opacity: 0.9;"/>
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Region prefWidth="50" prefHeight="3"
+                        style="-fx-background-color: #FFFFFF; -fx-background-radius: 2;"/>
+            </HBox>
+
+            <Text text="Prioritizing Care, Saving Lives"
+                  style="-fx-font-size: 16px; -fx-fill: #FFFFFF; -fx-opacity: 0.8; -fx-font-style: italic;"/>
+        </VBox>
+
+        <!-- Decorative Elements -->
+        <Circle centerX="500" centerY="100" radius="120" fill="#FFFFFF" opacity="0.08"/>
+        <Circle centerX="50" centerY="600" radius="80" fill="#FFFFFF" opacity="0.08"/>
+
+        <!-- Bottom Info -->
+        <HBox layoutX="150" layoutY="630" spacing="8" alignment="CENTER">
+            <FontIcon iconLiteral="fas-shield-alt" iconSize="16" iconColor="#FFFFFF" opacity="0.7"/>
+            <Text text="Secure Healthcare Portal"
+                  style="-fx-font-size: 13px; -fx-fill: #FFFFFF; -fx-opacity: 0.7;"/>
+        </HBox>
+    </AnchorPane>
+
+    <!-- ========== RIGHT SIDE: LOGIN FORM ========== -->
+    <VBox layoutX="650" layoutY="120" spacing="35" prefWidth="480" alignment="TOP_CENTER">
+
+        <!-- Welcome Header -->
+        <VBox spacing="8" alignment="CENTER">
+            <Text text="Welcome Back"
+                  style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-fill: #034c81;"/>
+            <Text text="Please sign in to continue"
+                  style="-fx-font-size: 14px; -fx-fill: #7f858c;"/>
+        </VBox>
+
+        <!-- Login Form Card -->
+        <VBox spacing="25"
               style="-fx-background-color: #FFFFFF;
-                     -fx-background-radius: 10;
-                     -fx-border-radius: 10;
-                     -fx-border-color: #034C81;   /* navy border */
-                     -fx-border-width: 0 0 0 5;   /* left accent bar */
-                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0, 0, 4);">
+                     -fx-background-radius: 12;
+                     -fx-border-color: #e8e8e8;
+                     -fx-border-width: 1;
+                     -fx-border-radius: 12;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
 
             <padding>
-                <Insets top="25" right="25" bottom="25" left="25"/>
+                <Insets top="40" right="40" bottom="40" left="40"/>
             </padding>
 
-            <!-- USERNAME -->
-            <TextField fx:id="usernameField"
-                       promptText="Username"
-                       prefHeight="40" maxWidth="300"
-                       style="-fx-background-color: #F7F7F7;
-                              -fx-border-color: #7F858C;
-                              -fx-border-radius: 6;
-                              -fx-background-radius: 6;" />
+            <!-- Username Field with Icon -->
+            <VBox spacing="8">
+                <Label text="Username"
+                       style="-fx-text-fill: #034c81; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                <HBox spacing="0" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #f8f9fa;
+                             -fx-border-color: #e0e0e0;
+                             -fx-border-radius: 8;
+                             -fx-background-radius: 8;">
+                    <StackPane prefWidth="45" prefHeight="48" alignment="CENTER">
+                        <FontIcon iconLiteral="fas-user" iconSize="18" iconColor="#7f858c"/>
+                    </StackPane>
+                    <TextField fx:id="usernameField"
+                               promptText="Enter your username"
+                               prefHeight="48" maxWidth="Infinity"
+                               HBox.hgrow="ALWAYS"
+                               style="-fx-background-color: transparent;
+                                      -fx-border-color: transparent;
+                                      -fx-background-radius: 0 8 8 0;
+                                      -fx-prompt-text-fill: #adb5bd;
+                                      -fx-text-fill: #034c81;
+                                      -fx-font-size: 14px;">
+                        <padding>
+                            <Insets right="15"/>
+                        </padding>
+                    </TextField>
+                </HBox>
+            </VBox>
 
-            <!-- PASSWORD -->
-            <PasswordField fx:id="passwordField"
-                           promptText="Password"
-                           prefHeight="40" maxWidth="300"
-                           style="-fx-background-color: #F7F7F7;
-                                  -fx-border-color: #7F858C;
-                                  -fx-border-radius: 6;
-                                  -fx-background-radius: 6;" />
+            <!-- Password Field with Icon -->
+            <VBox spacing="8">
+                <Label text="Password"
+                       style="-fx-text-fill: #034c81; -fx-font-size: 13px; -fx-font-weight: bold;"/>
+                <HBox spacing="0" alignment="CENTER_LEFT"
+                      style="-fx-background-color: #f8f9fa;
+                             -fx-border-color: #e0e0e0;
+                             -fx-border-radius: 8;
+                             -fx-background-radius: 8;">
+                    <StackPane prefWidth="45" prefHeight="48" alignment="CENTER">
+                        <FontIcon iconLiteral="fas-lock" iconSize="18" iconColor="#7f858c"/>
+                    </StackPane>
+                    <PasswordField fx:id="passwordField"
+                                   promptText="Enter your password"
+                                   prefHeight="48" maxWidth="Infinity"
+                                   HBox.hgrow="ALWAYS"
+                                   style="-fx-background-color: transparent;
+                                          -fx-border-color: transparent;
+                                          -fx-background-radius: 0 8 8 0;
+                                          -fx-prompt-text-fill: #adb5bd;
+                                          -fx-text-fill: #034c81;
+                                          -fx-font-size: 14px;">
+                        <padding>
+                            <Insets right="15"/>
+                        </padding>
+                    </PasswordField>
+                </HBox>
+            </VBox>
 
-            <!-- LOGIN BUTTON -->
-            <Button text="Login"
-                    onAction="#onLoginButtonClick"
-                    prefWidth="160" prefHeight="45"
-                    style="-fx-background-color: #2CA3FA;
+            <!-- Remember Me & Forgot Password -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <CheckBox text="Remember me"
+                          style="-fx-text-fill: #7f858c; -fx-font-size: 13px;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Hyperlink text="Forgot password?"
+                           style="-fx-text-fill: #2ca3fa; -fx-font-size: 13px;"/>
+            </HBox>
+
+            <!-- Login Button -->
+            <Button onAction="#onLoginButtonClick"
+                    maxWidth="Infinity" prefHeight="52"
+                    style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
                            -fx-text-fill: white;
                            -fx-font-size: 16px;
                            -fx-font-weight: bold;
-                           -fx-background-radius: 8;" />
+                           -fx-background-radius: 10;
+                           -fx-cursor: hand;
+                           -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.3), 10, 0, 0, 3);">
+                <graphic>
+                    <HBox spacing="10" alignment="CENTER">
+                        <Label text="Sign In" style="-fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold;"/>
+                        <FontIcon iconLiteral="fas-arrow-right" iconSize="16" iconColor="white"/>
+                    </HBox>
+                </graphic>
+            </Button>
 
-            <!-- ERROR LABEL -->
-            <Label fx:id="errorLabel"
-                   textFill="#D9534F"
-                   style="-fx-font-size: 14px;" />
+            <!-- Error Label -->
+            <HBox fx:id="errorContainer" visible="false" managed="false"
+                  spacing="10" alignment="CENTER_LEFT"
+                  style="-fx-background-color: #fff3f3;
+                         -fx-border-color: #ff6b6b;
+                         -fx-border-width: 1;
+                         -fx-border-radius: 6;
+                         -fx-background-radius: 6;
+                         -fx-padding: 12;">
+                <FontIcon iconLiteral="fas-exclamation-circle" iconSize="16" iconColor="#ff6b6b"/>
+                <Label fx:id="errorLabel"
+                       style="-fx-text-fill: #ff6b6b; -fx-font-size: 13px;"
+                       wrapText="true" maxWidth="Infinity" HBox.hgrow="ALWAYS"/>
+            </HBox>
 
         </VBox>
 
+        <!-- Additional Info -->
+        <HBox spacing="5" alignment="CENTER">
+            <Text text="Need help?"
+                  style="-fx-font-size: 13px; -fx-fill: #7f858c;"/>
+            <Hyperlink text="Contact IT Support"
+                       style="-fx-text-fill: #2ca3fa; -fx-font-size: 13px;"/>
+        </HBox>
+
     </VBox>
+
+    <!-- Version Info -->
+    <HBox layoutX="650" layoutY="660" spacing="8" alignment="CENTER">
+        <FontIcon iconLiteral="fas-info-circle" iconSize="12" iconColor="#c9bbaa"/>
+        <Text text="Version 1.0.0"
+              style="-fx-font-size: 11px; -fx-fill: #c9bbaa;"/>
+        <Text text="•"
+              style="-fx-font-size: 11px; -fx-fill: #c9bbaa;"/>
+        <Text text="© 2024 LifeLine Healthcare"
+              style="-fx-font-size: 11px; -fx-fill: #c9bbaa;"/>
+    </HBox>
 
 </AnchorPane>
