@@ -207,7 +207,7 @@
                 <!-- Logout Button -->
                 <HBox fx:id="itemLogout"
                       styleClass="menu-item logout-item"
-                      spacing="15" alignment="CENTER_LEFT"
+                      spacing="15" alignment="CENTER"
                       onMouseClicked="#handleLogout">
                     <HBox.margin>
                         <Insets left="10" right="10"/>
