@@ -4,6 +4,8 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.Parent;
+
 import com.example.triage.services.UserService;
 
 public class Main extends Application {
@@ -15,14 +17,25 @@ public class Main extends Application {
             FXMLLoader loader;
 
             if (UserService.isUserTableEmpty()) {
-                loader = new FXMLLoader(getClass().getResource("/com/triage/app/views/setup-admin.fxml"));
+                loader = new FXMLLoader(
+                        getClass().getResource("/com/triage/app/views/setup-admin.fxml")
+                );
             } else {
-                loader = new FXMLLoader(getClass().getResource("/com/example/triage/views/login-view.fxml"));
+                loader = new FXMLLoader(
+                        getClass().getResource("/com/example/triage/views/login-view.fxml")
+                );
             }
 
-            Scene scene = new Scene(loader.load(), 900, 600);
-            stage.setTitle("Triage System");
+            Parent root = loader.load();
+
+            Scene scene = new Scene(root);
             stage.setScene(scene);
+
+            stage.setMinWidth(900);
+            stage.setMinHeight(600);
+            stage.setResizable(true);
+
+            stage.setTitle("Triage System");
             stage.show();
 
         } catch (Exception e) {

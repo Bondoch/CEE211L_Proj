@@ -1,0 +1,11 @@
+.table-header {
+    -fx-background-color: #E6E6E6;
+    -fx-padding: 8;
+    -fx-font-weight: bold;
+}
+
+.table-row {
+    -fx-background-color: white;
+    -fx-padding: 8;
+    -fx-border-color: #DDD;
+}

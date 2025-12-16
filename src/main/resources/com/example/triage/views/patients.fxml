@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      spacing="15"
+      style="-fx-padding: 20;">
+
+    <!-- ================= LEFT SELECTOR PANEL ================= -->
+    <VBox spacing="15"
+          prefWidth="220"
+          style="-fx-background-color: #F4F6F7;
+                 -fx-padding: 15;
+                 -fx-background-radius: 10;">
+
+        <Label text="Select Area"
+               style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+
+        <VBox spacing="5">
+            <Label text="Facility"/>
+            <ComboBox fx:id="facilityCombo"
+                      promptText="Choose Facility"/>
+        </VBox>
+
+        <VBox spacing="5">
+            <Label text="Floor"/>
+            <ComboBox fx:id="floorCombo"
+                      promptText="Choose Floor"/>
+        </VBox>
+
+    </VBox>
+
+    <!-- ================= RIGHT CONTENT AREA ================= -->
+    <StackPane fx:id="patientStack"
+               style="-fx-background-color: #ECF0F1;
+                      -fx-background-radius: 10;
+                      -fx-padding: 15;">
+
+        <!-- ===== BASE LAYER: PATIENT GRID ===== -->
+        <VBox spacing="15">
+
+            <!-- Selected Area Header -->
+            <Label fx:id="areaLabel"
+                   text="Inpatient Ward — Floor 2"
+                   style="-fx-font-size: 18px;
+                          -fx-font-weight: bold;" />
+
+            <!-- Patient Cards -->
+            <FlowPane fx:id="patientGrid"
+                      hgap="15"
+                      vgap="15"
+                      prefWrapLength="800"/>
+
+        </VBox>
+
+        <!-- ===== OVERLAY LAYER: FLOATING DETAIL CARD ===== -->
+        <VBox fx:id="patientDetailCard"
+              visible="false"
+              managed="false"
+              spacing="10"
+              prefWidth="320"
+              style="-fx-background-color: white;
+                     -fx-padding: 15;
+                     -fx-background-radius: 12;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 15, 0, 0, 5);">
+
+            <!-- Header with Close Button -->
+            <HBox alignment="CENTER_LEFT">
+                <Label text="Patient Details"
+                       style="-fx-font-size: 16px;
+                              -fx-font-weight: bold;" />
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Button text="✕"
+                        style="-fx-background-color: transparent;
+                               -fx-font-size: 14px;" />
+            </HBox>
+
+            <Separator/>
+
+            <!-- Detail Content (PLACEHOLDERS) -->
+            <Label text="Name: John Doe"/>
+            <Label text="Age: 45"/>
+            <Label text="Severity: High"/>
+            <Label text="Bed: 2A"/>
+
+            <Separator/>
+
+            <!-- Action Buttons -->
+            <HBox spacing="10">
+                <Button text="Edit"/>
+                <Button text="Refer"/>
+                <Button text="Discharge"/>
+            </HBox>
+
+        </VBox>
+
+    </StackPane>
+
+</HBox>

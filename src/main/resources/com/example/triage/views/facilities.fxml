@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<HBox spacing="20"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.triage.controllers.FacilitiesController"
+      style="-fx-padding: 20;">
+
+    <!-- LEFT SIDEBAR -->
+    <VBox prefWidth="260"
+          spacing="12"
+          style="
+              -fx-background-color: #F4F6F7;
+              -fx-padding: 16;
+              -fx-background-radius: 14;
+              -fx-border-radius: 14;
+          "
+          styleClass="card sidebar-card">
+
+        <Label text="Facilities" styleClass="section-title"/>
+
+        <Label text="Facility"/>
+        <ComboBox fx:id="facilitySelector" promptText="Select Facility"/>
+
+        <Label text="Floor"/>
+        <ComboBox fx:id="floorSelector" promptText="Select Floor"/>
+
+        <Separator/>
+
+        <!-- ACTIONS -->
+        <VBox spacing="8">
+
+            <Button text="+ Add Facility"
+                    maxWidth="Infinity"/>
+
+            <!-- EDIT BUTTON -->
+            <Button fx:id="editFacilityBtn"
+                    text="Edit Facility"
+                    maxWidth="Infinity"/>
+
+            <!-- EDIT PANEL (HIDDEN) -->
+            <VBox fx:id="editFacilityPanel"
+                  spacing="8"
+                  visible="false"
+                  managed="false">
+
+                <ComboBox fx:id="facilityStatusBox"
+                          promptText="Select Status"
+                          maxWidth="Infinity"/>
+
+                <Button fx:id="doneEditBtn"
+                        text="Done"
+                        maxWidth="Infinity"/>
+            </VBox>
+
+            <Button text="- Remove Facility"
+                    maxWidth="Infinity"/>
+
+        </VBox>
+    </VBox>
+
+    <!-- MAIN DISPLAY -->
+    <VBox spacing="14"
+          HBox.hgrow="ALWAYS"
+          style="
+              -fx-background-color: white;
+              -fx-padding: 18;
+              -fx-background-radius: 14;
+              -fx-border-radius: 14;
+          "
+          styleClass="card main-card">
+
+        <Label fx:id="facilityTitle"
+               text="Select a facility"
+               styleClass="section-title"/>
+
+        <ScrollPane fitToWidth="true"
+                    fitToHeight="true"
+                    VBox.vgrow="ALWAYS"
+                    style="-fx-background-color: transparent;">
+
+            <FlowPane fx:id="unitGrid"
+                      hgap="15"
+                      vgap="15"
+                      style="-fx-padding: 15;"/>
+        </ScrollPane>
+
+    </VBox>
+
+</HBox>

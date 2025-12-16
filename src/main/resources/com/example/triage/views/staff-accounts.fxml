@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.example.triage.controllers.StaffAccountsController"
+            style="-fx-padding: 20;">
+
+    <center>
+        <VBox spacing="20"
+              maxWidth="Infinity"
+              VBox.vgrow="ALWAYS">
+
+            <!-- ON SHIFT STAFF SECTION -->
+            <VBox spacing="10"
+                  styleClass="card"
+                  maxWidth="Infinity">
+                <Label text="On-Shift Staff"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+                <FlowPane fx:id="onShiftContainer"
+                          hgap="10"
+                          vgap="10"
+                          prefHeight="150"
+                          style="-fx-background-color: #FFFFFF; -fx-padding: 10;" />
+            </VBox>
+
+            <!-- ALL STAFF SECTION -->
+            <VBox spacing="10"
+                  styleClass="card"
+                  maxWidth="Infinity"
+                  VBox.vgrow="ALWAYS">
+
+                <Label text="All Staff"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+
+                <!-- HEADER ROW -->
+                <GridPane hgap="10" styleClass="table-header">
+                    <columnConstraints>
+                        <ColumnConstraints prefWidth="40"/>
+                        <ColumnConstraints percentWidth="30"/>
+                        <ColumnConstraints percentWidth="20"/>
+                        <ColumnConstraints percentWidth="30"/>
+                        <ColumnConstraints percentWidth="20"/>
+                    </columnConstraints>
+
+                    <Label text="✓" GridPane.columnIndex="0"/>
+                    <Label text="Name" GridPane.columnIndex="1"/>
+                    <Label text="Role" GridPane.columnIndex="2"/>
+                    <Label text="Facility" GridPane.columnIndex="3"/>
+                    <Label text="On Shift" GridPane.columnIndex="4"/>
+                </GridPane>
+
+                <!-- BODY (SCROLLABLE) -->
+                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+                    <VBox fx:id="staffRows" spacing="6"/>
+                </ScrollPane>
+
+                <!-- ACTION BUTTONS -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button text="+ Add Staff"/>
+                    <Button text="Delete Selected"/>
+                </HBox>
+
+            </VBox>
+
+        </VBox>
+    </center>
+
+</BorderPane>
