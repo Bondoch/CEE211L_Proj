@@ -6,6 +6,7 @@ import com.example.triage.database.DBConnection;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
+import javafx.scene.control.CheckBox;
 import javafx.scene.layout.HBox;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -17,6 +18,8 @@ import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.animation.ParallelTransition;
 import javafx.util.Duration;
+import java.util.prefs.Preferences;
+
 
 public class LoginController {
 
@@ -31,6 +34,11 @@ public class LoginController {
 
     @FXML
     private HBox errorContainer;
+
+    @FXML
+    private CheckBox rememberMeCheckBox;
+
+    private Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
 
     @FXML
     private void onLoginButtonClick() {
@@ -69,7 +77,18 @@ public class LoginController {
 
             ResultSet rs = stmt.executeQuery();
 
-            return rs.next(); // True = login successful
+            if (rs.next()) {
+                // Save username if Remember Me is checked
+                if (rememberMeCheckBox.isSelected()) {
+                    prefs.put("savedUsername", username);
+                    prefs.putBoolean("rememberMe", true);
+                } else {
+                    prefs.remove("savedUsername");
+                    prefs.putBoolean("rememberMe", false);
+                }
+                return true;
+            }
+            return false;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -154,7 +173,22 @@ public class LoginController {
     }
 
     // ========================================
-    // OPTIONAL: ENTER KEY SUPPORT
+    // REMEMBER ME FUNCTIONALITY
+    // ========================================
+
+    private void loadSavedCredentials() {
+        String savedUsername = prefs.get("savedUsername", null);
+        boolean rememberMe = prefs.getBoolean("rememberMe", false);
+
+        if (rememberMe && savedUsername != null) {
+            usernameField.setText(savedUsername);
+            rememberMeCheckBox.setSelected(true);
+            passwordField.requestFocus(); // Focus on password field
+        }
+    }
+
+    // ========================================
+    // INITIALIZATION
     // ========================================
 
     @FXML
@@ -166,5 +200,8 @@ public class LoginController {
 
         // Hide error container initially
         hideError();
+
+        // Load saved username if "Remember Me" was checked
+        loadSavedCredentials();
     }
 }

@@ -3,6 +3,7 @@ module com.example.triage {
     requires javafx.fxml;
     requires javafx.graphics;
     requires java.sql;
+    requires java.prefs;
 
     opens com.example.triage to javafx.fxml;
     opens com.example.triage.controllers to javafx.fxml;
