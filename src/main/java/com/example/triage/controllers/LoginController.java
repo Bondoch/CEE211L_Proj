@@ -3,6 +3,7 @@ package com.example.triage.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import com.example.triage.database.DBConnection;
+import com.example.triage.services.SessionManager;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Label;
@@ -16,27 +17,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
-import javafx.animation.ParallelTransition;
 import javafx.util.Duration;
 import java.util.prefs.Preferences;
 
-
 public class LoginController {
 
-    @FXML
-    private TextField usernameField;
-
-    @FXML
-    private PasswordField passwordField;
-
-    @FXML
-    private Label errorLabel;
-
-    @FXML
-    private HBox errorContainer;
-
-    @FXML
-    private CheckBox rememberMeCheckBox;
+    @FXML private TextField usernameField;
+    @FXML private PasswordField passwordField;
+    @FXML private Label errorLabel;
+    @FXML private HBox errorContainer;
+    @FXML private CheckBox rememberMeCheckBox;
 
     private Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
 
@@ -45,29 +35,24 @@ public class LoginController {
         String username = usernameField.getText().trim();
         String password = passwordField.getText();
 
-        // Clear previous errors
         hideError();
 
-        // Validation
         if (username.isEmpty() || password.isEmpty()) {
             showError("Please enter both username and password.");
             return;
         }
 
-        // Authenticate
         if (authenticateUser(username, password)) {
             System.out.println("Login successful for user: " + username);
             loadDashboard();
         } else {
             showError("Invalid username or password. Please try again.");
-
-            // Shake animation for wrong credentials
             shakeFields();
         }
     }
 
     private boolean authenticateUser(String username, String password) {
-        String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
+        String sql = "SELECT id, username, role FROM users WHERE username = ? AND password = ?";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -78,6 +63,12 @@ public class LoginController {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
+                int userId = rs.getInt("id");
+                String role = rs.getString("role");
+
+                // Start session
+                SessionManager.getInstance().startSession(userId, username, role);
+
                 // Save username if Remember Me is checked
                 if (rememberMeCheckBox.isSelected()) {
                     prefs.put("savedUsername", username);
@@ -102,10 +93,7 @@ public class LoginController {
         fade.setFromValue(1.0);
         fade.setToValue(0.0);
 
-        fade.setOnFinished(event -> {
-            showDashboard();
-        });
-
+        fade.setOnFinished(event -> showDashboard());
         fade.play();
     }
 
@@ -129,23 +117,17 @@ public class LoginController {
         }
     }
 
-    // ========================================
-    // ERROR HANDLING METHODS
-    // ========================================
-
     private void showError(String message) {
         if (errorContainer != null) {
             errorContainer.setVisible(true);
             errorContainer.setManaged(true);
             errorLabel.setText(message);
 
-            // Fade in animation
             FadeTransition fadeIn = new FadeTransition(Duration.millis(200), errorContainer);
             fadeIn.setFromValue(0.0);
             fadeIn.setToValue(1.0);
             fadeIn.play();
         } else {
-            // Fallback if errorContainer is not defined
             errorLabel.setText(message);
         }
     }
@@ -158,12 +140,7 @@ public class LoginController {
         errorLabel.setText("");
     }
 
-    // ========================================
-    // UI FEEDBACK ANIMATIONS
-    // ========================================
-
     private void shakeFields() {
-        // Shake animation for visual feedback on wrong credentials
         TranslateTransition shake = new TranslateTransition(Duration.millis(50), usernameField.getParent());
         shake.setFromX(0);
         shake.setCycleCount(4);
@@ -172,10 +149,6 @@ public class LoginController {
         shake.play();
     }
 
-    // ========================================
-    // REMEMBER ME FUNCTIONALITY
-    // ========================================
-
     private void loadSavedCredentials() {
         String savedUsername = prefs.get("savedUsername", null);
         boolean rememberMe = prefs.getBoolean("rememberMe", false);
@@ -183,25 +156,16 @@ public class LoginController {
         if (rememberMe && savedUsername != null) {
             usernameField.setText(savedUsername);
             rememberMeCheckBox.setSelected(true);
-            passwordField.requestFocus(); // Focus on password field
+            passwordField.requestFocus();
         }
     }
 
-    // ========================================
-    // INITIALIZATION
-    // ========================================
-
     @FXML
     public void initialize() {
-        // Allow Enter key to submit from password field
         if (passwordField != null) {
             passwordField.setOnAction(event -> onLoginButtonClick());
         }
-
-        // Hide error container initially
         hideError();
-
-        // Load saved username if "Remember Me" was checked
         loadSavedCredentials();
     }
 }
