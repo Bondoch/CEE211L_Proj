@@ -88,8 +88,8 @@
                           -fx-font-weight: bold;
                           -fx-text-fill: #034c81;"/>
 
-            <!-- Add Facility Button -->
-            <Button text="Add Facility"
+            <!-- Add Facility -->
+            <Button onAction="#handleAddFacility"
                     maxWidth="Infinity"
                     prefHeight="42"
                     style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
@@ -110,9 +110,9 @@
                 </graphic>
             </Button>
 
-            <!-- Edit Facility Button -->
+            <!-- Edit Facility -->
             <Button fx:id="editFacilityBtn"
-                    text="Edit Facility"
+                    onAction="#handleEditFacility"
                     maxWidth="Infinity"
                     prefHeight="40"
                     style="-fx-background-color: #f8f9fa;
@@ -135,7 +135,26 @@
                 </graphic>
             </Button>
 
-            <!-- Edit Panel (Hidden by default) -->
+            <!-- ADD FACILITY PANEL -->
+            <VBox fx:id="addFacilityPanel" spacing="10" visible="false" managed="false"
+                  style="-fx-background-color:#f8f9fa;-fx-padding:15;-fx-border-color:#2ca3fa;-fx-border-radius:8;">
+                <Label text="Add Facility"/>
+                <TextField fx:id="addFacilityName" promptText="Facility Name"/>
+                <ComboBox fx:id="addFacilityType" promptText="Facility Type"/>
+                <Spinner fx:id="addFacilityFloors"/>
+                <Button text="Save" onAction="#confirmAddFacility"/>
+            </VBox>
+
+            <!-- REMOVE FACILITY PANEL -->
+            <VBox fx:id="removeFacilityPanel" spacing="10" visible="false" managed="false"
+                  style="-fx-background-color:#fff3f3;-fx-padding:15;-fx-border-color:#ff6b6b;-fx-border-radius:8;">
+                <Label text="Remove Facility"/>
+                <ComboBox fx:id="removeFacilitySelector" promptText="Facility"/>
+                <ComboBox fx:id="removeFloorSelector" promptText="Optional Floor"/>
+                <Button text="Remove" onAction="#confirmRemoveFacility"/>
+            </VBox>
+
+            <!-- Edit Panel -->
             <VBox fx:id="editFacilityPanel"
                   spacing="10"
                   visible="false"
@@ -162,7 +181,7 @@
                                  -fx-font-size: 12px;"/>
 
                 <Button fx:id="doneEditBtn"
-                        text="Done"
+                        onAction="#handleDoneEdit"
                         maxWidth="Infinity"
                         prefHeight="36"
                         style="-fx-background-color: #2ca3fa;
@@ -177,8 +196,8 @@
                 </Button>
             </VBox>
 
-            <!-- Remove Facility Button -->
-            <Button text="Remove Facility"
+            <!-- Remove Facility -->
+            <Button onAction="#handleRemoveFacility"
                     maxWidth="Infinity"
                     prefHeight="40"
                     style="-fx-background-color: #fff3f3;
@@ -202,10 +221,9 @@
             </Button>
         </VBox>
 
-        <!-- Spacer -->
         <Region VBox.vgrow="ALWAYS"/>
 
-        <!-- Info Card at Bottom -->
+        <!-- Info Card -->
         <VBox spacing="8"
               style="-fx-background-color: linear-gradient(to bottom right, #f0f8ff, #e6f4ff);
                      -fx-background-radius: 10;
@@ -250,7 +268,6 @@
                               -fx-text-fill: #7f858c;"/>
             </VBox>
 
-            <!-- Stats Summary -->
             <HBox spacing="15" alignment="CENTER_RIGHT">
                 <VBox spacing="2" alignment="CENTER"
                       style="-fx-background-color: #e8f5e9;
@@ -286,7 +303,6 @@
 
         <Separator style="-fx-background-color: #e8e8e8;"/>
 
-        <!-- Room Grid Area -->
         <ScrollPane fitToWidth="true"
                     fitToHeight="true"
                     VBox.vgrow="ALWAYS"
@@ -301,7 +317,6 @@
             </content>
         </ScrollPane>
 
-        <!-- Empty State (shown when no facility selected) -->
         <VBox fx:id="emptyState"
               spacing="15"
               alignment="CENTER"
