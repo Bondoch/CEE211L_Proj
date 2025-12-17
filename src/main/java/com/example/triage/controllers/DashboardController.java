@@ -40,15 +40,12 @@ public class DashboardController {
            SIDEBAR — CRITICAL FIX
            ================================ */
 
-
         sidebar.setTranslateX(-SIDEBAR_WIDTH);   // hidden by default
         sidebar.setVisible(true);                // always visible logically
-
 
         /* ================================
            OVERLAY
            ================================ */
-
 
         overlay.setVisible(false);
         overlay.setManaged(false);
@@ -147,7 +144,7 @@ public class DashboardController {
                 loadContent("facilities.fxml");
                 break;
             case "Settings":
-                loadContent("settings.fxml");
+                loadSettingsWithStage();
                 break;
         }
 
@@ -160,6 +157,32 @@ public class DashboardController {
                     getClass().getResource("/com/example/triage/views/" + fxml)
             );
             Parent view = loader.load();
+            contentArea.setCenter(view);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /* ================================
+       LOAD SETTINGS WITH STAGE REFERENCE
+       ================================ */
+    private void loadSettingsWithStage() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/triage/views/settings.fxml")
+            );
+            Parent view = loader.load();
+
+            // Get controller and pass Stage reference
+            SettingsController settingsController = loader.getController();
+            if (settingsController != null) {
+                Stage stage = (Stage) sidebar.getScene().getWindow();
+                settingsController.setPrimaryStage(stage);
+
+                // Also pass current username if available
+                // settingsController.setCurrentUser(currentUsername);
+            }
+
             contentArea.setCenter(view);
         } catch (Exception e) {
             e.printStackTrace();

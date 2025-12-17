@@ -6,6 +6,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.animation.FadeTransition;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.util.prefs.Preferences;
 import com.example.triage.database.DBConnection;
@@ -56,6 +57,26 @@ public class SettingsController {
 
     // Current logged-in user
     private String currentUsername = "admin"; // Default fallback
+
+    // Stage reference to update window title
+    private Stage primaryStage;
+
+    // ✅ Method to receive Stage from DashboardController
+    public void setPrimaryStage(Stage stage) {
+        this.primaryStage = stage;
+        System.out.println("Settings: Stage reference received");
+
+        // Update window title immediately if system name exists in preferences
+        updateWindowTitle();
+    }
+
+    // ✅ Update window title from saved system name
+    private void updateWindowTitle() {
+        if (primaryStage != null) {
+            String systemName = prefs.get("systemName", "LifeLine Triage System");
+            primaryStage.setTitle(systemName + " - Dashboard");
+        }
+    }
 
     // ✅ Method to receive username from DashboardController
     public void setCurrentUser(String username) {
@@ -270,6 +291,9 @@ public class SettingsController {
     private void handleSaveChanges() {
         // Save all settings to preferences
         prefs.put("systemName", systemNameField.getText());
+        // ✅ Update window title immediately
+        updateWindowTitle();
+
         prefs.put("facilityName", facilityNameField.getText());
         prefs.put("timeZone", timeZoneCombo.getValue());
         prefs.put("language", languageCombo.getValue());
