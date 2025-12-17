@@ -33,8 +33,16 @@ public class DashboardController {
     @FXML private BorderPane contentArea;
     @FXML private VBox logoutPanel;
 
-
     private boolean menuOpen = false;
+
+    // ✅ Store current logged-in user
+    private String currentUsername = "";
+
+    // ✅ Method to receive username from LoginController
+    public void setCurrentUser(String username) {
+        this.currentUsername = username;
+        System.out.println("Current user set: " + username);
+    }
 
     @FXML
     public void initialize() {
@@ -145,10 +153,14 @@ public class DashboardController {
             case "Facilities":
                 loadContent("facilities.fxml");
                 break;
+            case "Settings":
+                loadContent("settings.fxml");
+                break;
         }
 
         if (menuOpen) toggleSidebar();
     }
+
     private void loadContent(String fxml) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -156,12 +168,19 @@ public class DashboardController {
             );
             Parent view = loader.load();
 
+            // ✅ Pass username to SettingsController if loading settings
+            if (fxml.equals("settings.fxml")) {
+                SettingsController settingsController = loader.getController();
+                settingsController.setCurrentUser(currentUsername);
+            }
+
             contentArea.setCenter(view);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void handleLogout() {
         overlay.setVisible(true);
@@ -172,6 +191,7 @@ public class DashboardController {
         logoutPanel.setManaged(true);
         logoutPanel.toFront();
     }
+
     @FXML
     private void cancelLogout() {
         logoutPanel.setVisible(false);
@@ -180,6 +200,7 @@ public class DashboardController {
         overlay.setVisible(false);
         overlay.setManaged(false);
     }
+
     @FXML
     public void performLogout() {
         try {

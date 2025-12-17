@@ -40,6 +40,9 @@ public class LoginController {
 
     private Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
 
+    // Store logged-in username to pass to dashboard
+    private String loggedInUsername = "";
+
     @FXML
     private void onLoginButtonClick() {
         String username = usernameField.getText().trim();
@@ -57,6 +60,7 @@ public class LoginController {
         // Authenticate
         if (authenticateUser(username, password)) {
             System.out.println("Login successful for user: " + username);
+            loggedInUsername = username; // Store username
             loadDashboard();
         } else {
             showError("Invalid username or password. Please try again.");
@@ -113,6 +117,10 @@ public class LoginController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/triage/views/dashboard.fxml"));
             Scene dashboardScene = new Scene(loader.load(), 900, 600);
+
+            // ✅ PASS USERNAME TO DASHBOARD CONTROLLER
+            DashboardController dashboardController = loader.getController();
+            dashboardController.setCurrentUser(loggedInUsername);
 
             Stage stage = (Stage) usernameField.getScene().getWindow();
             stage.setTitle("Dashboard - LifeLine Triage System");
