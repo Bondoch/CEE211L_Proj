@@ -236,7 +236,7 @@
                         <graphic>
                             <HBox spacing="6" alignment="CENTER">
                                 <FontIcon iconLiteral="fas-user-plus" iconSize="14" iconColor="white"/>
-                                <Label text="Add Patient"
+                                <Label text=""
                                        style="-fx-text-fill: white;
                                               -fx-font-size: 13px;
                                               -fx-font-weight: bold;"/>

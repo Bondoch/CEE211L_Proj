@@ -115,7 +115,11 @@ public class LoginController {
             Scene dashboardScene = new Scene(loader.load(), 900, 600);
 
             Stage stage = (Stage) usernameField.getScene().getWindow();
-            stage.setTitle("Dashboard - LifeLine Triage System");
+
+            // ✅ Load system name from preferences
+            String systemName = prefs.get("systemName", "LifeLine Triage System");
+            stage.setTitle(systemName + " - Dashboard");
+
             stage.setScene(dashboardScene);
 
             FadeTransition fadeIn = new FadeTransition(Duration.millis(300), dashboardScene.getRoot());

@@ -102,7 +102,7 @@
                 <graphic>
                     <HBox spacing="8" alignment="CENTER">
                         <FontIcon iconLiteral="fas-plus-circle" iconSize="14" iconColor="white"/>
-                        <Label text="Add Facility"
+                        <Label text=""
                                style="-fx-text-fill: white;
                                       -fx-font-size: 13px;
                                       -fx-font-weight: bold;"/>
@@ -127,7 +127,7 @@
                 <graphic>
                     <HBox spacing="8" alignment="CENTER">
                         <FontIcon iconLiteral="fas-edit" iconSize="14" iconColor="#034c81"/>
-                        <Label text="Edit Facility"
+                        <Label text=""
                                style="-fx-text-fill: #034c81;
                                       -fx-font-size: 13px;
                                       -fx-font-weight: bold;"/>
@@ -212,7 +212,7 @@
                 <graphic>
                     <HBox spacing="8" alignment="CENTER">
                         <FontIcon iconLiteral="fas-trash-alt" iconSize="14" iconColor="#ff6b6b"/>
-                        <Label text="Remove Facility"
+                        <Label text=""
                                style="-fx-text-fill: #ff6b6b;
                                       -fx-font-size: 13px;
                                       -fx-font-weight: bold;"/>

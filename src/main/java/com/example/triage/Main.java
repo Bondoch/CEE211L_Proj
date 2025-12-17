@@ -35,7 +35,11 @@ public class Main extends Application {
             stage.setMinHeight(600);
             stage.setResizable(true);
 
-            stage.setTitle("Triage System");
+            // ✅ Load system name from preferences
+            java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(Main.class);
+            String systemName = prefs.get("systemName", "LifeLine Triage System");
+            stage.setTitle(systemName);
+
             stage.show();
 
         } catch (Exception e) {
