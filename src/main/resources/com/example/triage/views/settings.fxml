@@ -1,0 +1,745 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.triage.controllers.SettingsController"
+      spacing="25"
+      style="-fx-background-color: #f5f7fa;">
+
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25"/>
+    </padding>
+
+    <!-- ========== HEADER SECTION ========== -->
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <VBox spacing="4" HBox.hgrow="ALWAYS">
+            <Label text="System Settings"
+                   style="-fx-font-size: 28px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;"/>
+            <Label text="Configure system preferences and non-clinical settings"
+                   style="-fx-font-size: 13px;
+                          -fx-text-fill: #7f858c;"/>
+        </VBox>
+
+        <!-- Save Button -->
+        <Button text="Save Changes"
+                onAction="#handleSaveChanges"
+                prefHeight="45" prefWidth="160"
+                style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
+                       -fx-text-fill: white;
+                       -fx-font-size: 14px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 10;
+                       -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.3), 10, 0, 0, 3);">
+            <graphic>
+                <HBox spacing="8" alignment="CENTER">
+                    <FontIcon iconLiteral="fas-save" iconSize="14" iconColor="white"/>
+                    <Label text=""
+                           style="-fx-text-fill: white;
+                                  -fx-font-size: 14px;
+                                  -fx-font-weight: bold;"/>
+                </HBox>
+            </graphic>
+        </Button>
+    </HBox>
+
+    <Separator style="-fx-background-color: #e8e8e8;"/>
+
+    <!-- ========== SETTINGS GRID ========== -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent;
+                       -fx-background: transparent;">
+        <content>
+            <VBox spacing="20">
+
+                <!-- ========== SYSTEM CONFIGURATION CARD ========== -->
+                <VBox spacing="20"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 16;
+                             -fx-padding: 25;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <StackPane style="-fx-background-color: linear-gradient(to right, #034c81, #2ca3fa);
+                                          -fx-background-radius: 10;
+                                          -fx-padding: 10;">
+                            <FontIcon iconLiteral="fas-cogs" iconSize="20" iconColor="white"/>
+                        </StackPane>
+                        <VBox spacing="2">
+                            <Label text="System Configuration"
+                                   style="-fx-font-size: 18px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <Label text="Core system settings and preferences"
+                                   style="-fx-font-size: 12px;
+                                          -fx-text-fill: #7f858c;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Separator style="-fx-background-color: #e8e8e8;"/>
+
+                    <GridPane hgap="30" vgap="20">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <!-- System Name -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="System Name"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <TextField fx:id="systemNameField"
+                                       promptText="Enter system name"
+                                       text="LifeLine Triage System"
+                                       style="-fx-background-color: #f8f9fa;
+                                              -fx-border-color: #e0e0e0;
+                                              -fx-border-radius: 8;
+                                              -fx-background-radius: 8;
+                                              -fx-font-size: 13px;
+                                              -fx-padding: 10;"/>
+                        </VBox>
+
+                        <!-- Hospital/Facility Name -->
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Hospital/Facility Name"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <TextField fx:id="facilityNameField"
+                                       promptText="Enter facility name"
+                                       text="Central Medical Center"
+                                       style="-fx-background-color: #f8f9fa;
+                                              -fx-border-color: #e0e0e0;
+                                              -fx-border-radius: 8;
+                                              -fx-background-radius: 8;
+                                              -fx-font-size: 13px;
+                                              -fx-padding: 10;"/>
+                        </VBox>
+
+                        <!-- Time Zone -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <Label text="Time Zone"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <ComboBox fx:id="timeZoneCombo"
+                                      promptText="Select time zone"
+                                      maxWidth="Infinity"
+                                      style="-fx-background-color: #f8f9fa;
+                                             -fx-border-color: #e0e0e0;
+                                             -fx-border-radius: 8;
+                                             -fx-background-radius: 8;
+                                             -fx-font-size: 13px;"/>
+                        </VBox>
+
+                        <!-- Language -->
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <Label text="System Language"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <ComboBox fx:id="languageCombo"
+                                      promptText="Select language"
+                                      maxWidth="Infinity"
+                                      style="-fx-background-color: #f8f9fa;
+                                             -fx-border-color: #e0e0e0;
+                                             -fx-border-radius: 8;
+                                             -fx-background-radius: 8;
+                                             -fx-font-size: 13px;"/>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <!-- ========== DATABASE CONFIGURATION CARD ========== -->
+                <VBox spacing="20"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 16;
+                             -fx-padding: 25;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <StackPane style="-fx-background-color: linear-gradient(to right, #034c81, #2ca3fa);
+                                          -fx-background-radius: 10;
+                                          -fx-padding: 10;">
+                            <FontIcon iconLiteral="fas-database" iconSize="20" iconColor="white"/>
+                        </StackPane>
+                        <VBox spacing="2">
+                            <Label text="Database Configuration"
+                                   style="-fx-font-size: 18px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <Label text="Database connection and backup settings"
+                                   style="-fx-font-size: 12px;
+                                          -fx-text-fill: #7f858c;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Separator style="-fx-background-color: #e8e8e8;"/>
+
+                    <GridPane hgap="30" vgap="20">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <!-- Database Host -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="Database Host"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <TextField fx:id="dbHostField"
+                                       promptText="localhost:3306"
+                                       text="localhost:3306"
+                                       style="-fx-background-color: #f8f9fa;
+                                              -fx-border-color: #e0e0e0;
+                                              -fx-border-radius: 8;
+                                              -fx-background-radius: 8;
+                                              -fx-font-size: 13px;
+                                              -fx-padding: 10;"/>
+                        </VBox>
+
+                        <!-- Database Name -->
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Database Name"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <TextField fx:id="dbNameField"
+                                       promptText="triage_db"
+                                       text="triage_db"
+                                       style="-fx-background-color: #f8f9fa;
+                                              -fx-border-color: #e0e0e0;
+                                              -fx-border-radius: 8;
+                                              -fx-background-radius: 8;
+                                              -fx-font-size: 13px;
+                                              -fx-padding: 10;"/>
+                        </VBox>
+
+                        <!-- Auto Backup -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <Label text="Automatic Backup"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <CheckBox fx:id="autoBackupCheck"
+                                          text="Enable automatic backups"
+                                          selected="true"
+                                          style="-fx-font-size: 13px;
+                                                 -fx-text-fill: #7f858c;"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Backup Frequency -->
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <Label text="Backup Frequency"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <ComboBox fx:id="backupFrequencyCombo"
+                                      promptText="Select frequency"
+                                      maxWidth="Infinity"
+                                      style="-fx-background-color: #f8f9fa;
+                                             -fx-border-color: #e0e0e0;
+                                             -fx-border-radius: 8;
+                                             -fx-background-radius: 8;
+                                             -fx-font-size: 13px;"/>
+                        </VBox>
+                    </GridPane>
+
+                    <!-- Test Connection Button -->
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Button text="Test Connection"
+                                onAction="#handleTestConnection"
+                                prefHeight="38"
+                                style="-fx-background-color: #f8f9fa;
+                                       -fx-text-fill: #034c81;
+                                       -fx-font-size: 13px;
+                                       -fx-font-weight: bold;
+                                       -fx-background-radius: 8;
+                                       -fx-border-color: #e0e0e0;
+                                       -fx-border-radius: 8;
+                                       -fx-border-width: 1;
+                                       -fx-cursor: hand;">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-plug" iconSize="14" iconColor="#034c81"/>
+                            </graphic>
+                        </Button>
+
+                        <Label fx:id="connectionStatusLabel"
+                               text="Not tested"
+                               style="-fx-font-size: 12px;
+                                      -fx-text-fill: #7f858c;"/>
+                    </HBox>
+                </VBox>
+
+                <!-- ========== NOTIFICATION SETTINGS CARD ========== -->
+                <VBox spacing="20"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 16;
+                             -fx-padding: 25;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <StackPane style="-fx-background-color: linear-gradient(to right, #034c81, #2ca3fa);
+                                          -fx-background-radius: 10;
+                                          -fx-padding: 10;">
+                            <FontIcon iconLiteral="fas-bell" iconSize="20" iconColor="white"/>
+                        </StackPane>
+                        <VBox spacing="2">
+                            <Label text="Notification Settings"
+                                   style="-fx-font-size: 18px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <Label text="Configure system alerts and notifications"
+                                   style="-fx-font-size: 12px;
+                                          -fx-text-fill: #7f858c;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Separator style="-fx-background-color: #e8e8e8;"/>
+
+                    <VBox spacing="15">
+                        <CheckBox fx:id="criticalAlertsCheck"
+                                  text="Enable critical patient alerts"
+                                  selected="true"
+                                  style="-fx-font-size: 13px;
+                                         -fx-text-fill: #034c81;"/>
+
+                        <CheckBox fx:id="roomAvailabilityCheck"
+                                  text="Room availability notifications"
+                                  selected="true"
+                                  style="-fx-font-size: 13px;
+                                         -fx-text-fill: #034c81;"/>
+
+                        <CheckBox fx:id="dischargeRemindersCheck"
+                                  text="Discharge reminders"
+                                  selected="false"
+                                  style="-fx-font-size: 13px;
+                                         -fx-text-fill: #034c81;"/>
+
+                        <CheckBox fx:id="systemMaintenanceCheck"
+                                  text="System maintenance alerts"
+                                  selected="true"
+                                  style="-fx-font-size: 13px;
+                                         -fx-text-fill: #034c81;"/>
+                    </VBox>
+                </VBox>
+
+                <!-- ========== DISPLAY PREFERENCES CARD ========== -->
+                <VBox spacing="20"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 16;
+                             -fx-padding: 25;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <StackPane style="-fx-background-color: linear-gradient(to right, #034c81, #2ca3fa);
+                                          -fx-background-radius: 10;
+                                          -fx-padding: 10;">
+                            <FontIcon iconLiteral="fas-desktop" iconSize="20" iconColor="white"/>
+                        </StackPane>
+                        <VBox spacing="2">
+                            <Label text="Display Preferences"
+                                   style="-fx-font-size: 18px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <Label text="Customize interface appearance"
+                                   style="-fx-font-size: 12px;
+                                          -fx-text-fill: #7f858c;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Separator style="-fx-background-color: #e8e8e8;"/>
+
+                    <GridPane hgap="30" vgap="20">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <!-- Theme -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="Theme"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <ComboBox fx:id="themeCombo"
+                                      promptText="Select theme"
+                                      maxWidth="Infinity"
+                                      style="-fx-background-color: #f8f9fa;
+                                             -fx-border-color: #e0e0e0;
+                                             -fx-border-radius: 8;
+                                             -fx-background-radius: 8;
+                                             -fx-font-size: 13px;"/>
+                        </VBox>
+
+                        <!-- Font Size -->
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Font Size"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <ComboBox fx:id="fontSizeCombo"
+                                      promptText="Select font size"
+                                      maxWidth="Infinity"
+                                      style="-fx-background-color: #f8f9fa;
+                                             -fx-border-color: #e0e0e0;
+                                             -fx-border-radius: 8;
+                                             -fx-background-radius: 8;
+                                             -fx-font-size: 13px;"/>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <!-- ========== SECURITY SETTINGS CARD ========== -->
+                <VBox spacing="20"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 16;
+                             -fx-padding: 25;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <StackPane style="-fx-background-color: linear-gradient(to right, #034c81, #2ca3fa);
+                                          -fx-background-radius: 10;
+                                          -fx-padding: 10;">
+                            <FontIcon iconLiteral="fas-lock" iconSize="20" iconColor="white"/>
+                        </StackPane>
+                        <VBox spacing="2">
+                            <Label text="Security Settings"
+                                   style="-fx-font-size: 18px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <Label text="Security and session management"
+                                   style="-fx-font-size: 12px;
+                                          -fx-text-fill: #7f858c;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Separator style="-fx-background-color: #e8e8e8;"/>
+
+                    <GridPane hgap="30" vgap="20">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <!-- Session Timeout -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="Session Timeout (minutes)"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <ComboBox fx:id="sessionTimeoutCombo"
+                                      promptText="Select timeout"
+                                      maxWidth="Infinity"
+                                      style="-fx-background-color: #f8f9fa;
+                                             -fx-border-color: #e0e0e0;
+                                             -fx-border-radius: 8;
+                                             -fx-background-radius: 8;
+                                             -fx-font-size: 13px;"/>
+                        </VBox>
+
+                        <!-- Password Policy -->
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Password Minimum Length"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <ComboBox fx:id="passwordLengthCombo"
+                                      promptText="Select length"
+                                      maxWidth="Infinity"
+                                      style="-fx-background-color: #f8f9fa;
+                                             -fx-border-color: #e0e0e0;
+                                             -fx-border-radius: 8;
+                                             -fx-background-radius: 8;
+                                             -fx-font-size: 13px;"/>
+                        </VBox>
+
+                        <!-- Two-Factor Auth -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <Label text="Two-Factor Authentication"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <HBox spacing="15" alignment="CENTER_LEFT">
+                                <CheckBox fx:id="twoFactorCheck"
+                                          text="Unavailable"
+                                          selected="false"
+                                          style="-fx-font-size: 13px;
+                                                 -fx-text-fill: #7f858c;"/>
+                            </HBox>
+                        </VBox>
+                    </GridPane>
+
+                    <Separator style="-fx-background-color: #e8e8e8;"/>
+
+                    <!-- Change Password Section -->
+                    <VBox spacing="15">
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <FontIcon iconLiteral="fas-key" iconSize="16" iconColor="#2ca3fa"/>
+                            <Label text="Change Admin Password"
+                                   style="-fx-font-size: 14px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                        </HBox>
+
+                        <Button text="Change Password"
+                                onAction="#handleChangePassword"
+                                prefHeight="40" prefWidth="180"
+                                style="-fx-background-color: #f8f9fa;
+                                       -fx-text-fill: #034c81;
+                                       -fx-font-size: 13px;
+                                       -fx-font-weight: bold;
+                                       -fx-background-radius: 8;
+                                       -fx-border-color: #e0e0e0;
+                                       -fx-border-radius: 8;
+                                       -fx-border-width: 1;
+                                       -fx-cursor: hand;">
+                            <graphic>
+                                <HBox spacing="8" alignment="CENTER">
+                                    <FontIcon iconLiteral="fas-key" iconSize="14" iconColor="#034c81"/>
+                                    <Label text=""
+                                           style="-fx-text-fill: #034c81;
+                                                  -fx-font-size: 13px;
+                                                  -fx-font-weight: bold;"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
+                    </VBox>
+                </VBox>
+
+                <!-- ========== CAPACITY WARNING SETTINGS CARD ========== -->
+                <VBox spacing="20"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 16;
+                             -fx-padding: 25;
+                             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <StackPane style="-fx-background-color: linear-gradient(to right, #ff9800, #f57c00);
+                                          -fx-background-radius: 10;
+                                          -fx-padding: 10;">
+                            <FontIcon iconLiteral="fas-chart-line" iconSize="20" iconColor="white"/>
+                        </StackPane>
+                        <VBox spacing="2">
+                            <Label text="Capacity Warning Settings"
+                                   style="-fx-font-size: 18px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <Label text="Set thresholds for facility capacity alerts"
+                                   style="-fx-font-size: 12px;
+                                          -fx-text-fill: #7f858c;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Separator style="-fx-background-color: #e8e8e8;"/>
+
+                    <!-- Capacity Warning Description -->
+                    <HBox spacing="10" alignment="CENTER_LEFT"
+                          style="-fx-background-color: #fff9e6;
+                                 -fx-background-radius: 8;
+                                 -fx-padding: 12;">
+                        <FontIcon iconLiteral="fas-info-circle" iconSize="16" iconColor="#ff9800"/>
+                        <Label text="System will alert staff when facility occupancy reaches the warning threshold."
+                               wrapText="true"
+                               style="-fx-font-size: 12px;
+                                      -fx-text-fill: #7f858c;"
+                               maxWidth="Infinity"/>
+                    </HBox>
+
+                    <GridPane hgap="30" vgap="20">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="50"/>
+                            <ColumnConstraints percentWidth="50"/>
+                        </columnConstraints>
+
+                        <!-- Warning Threshold -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="0">
+                            <Label text="Warning Threshold (%)"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Slider fx:id="warningThresholdSlider"
+                                        min="50" max="100" value="80"
+                                        blockIncrement="5"
+                                        majorTickUnit="10"
+                                        minorTickCount="1"
+                                        showTickLabels="true"
+                                        showTickMarks="true"
+                                        maxWidth="Infinity"
+                                        HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="warningThresholdLabel"
+                                       text="80%"
+                                       style="-fx-font-size: 16px;
+                                              -fx-font-weight: bold;
+                                              -fx-text-fill: #ff9800;
+                                              -fx-min-width: 50;
+                                              -fx-alignment: center-right;"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Critical Threshold -->
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="0">
+                            <Label text="Critical Threshold (%)"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <HBox spacing="10" alignment="CENTER_LEFT">
+                                <Slider fx:id="criticalThresholdSlider"
+                                        min="70" max="100" value="95"
+                                        blockIncrement="5"
+                                        majorTickUnit="10"
+                                        minorTickCount="1"
+                                        showTickLabels="true"
+                                        showTickMarks="true"
+                                        maxWidth="Infinity"
+                                        HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="criticalThresholdLabel"
+                                       text="95%"
+                                       style="-fx-font-size: 16px;
+                                              -fx-font-weight: bold;
+                                              -fx-text-fill: #ff6b6b;
+                                              -fx-min-width: 50;
+                                              -fx-alignment: center-right;"/>
+                            </HBox>
+                        </VBox>
+
+                        <!-- Enable Warnings -->
+                        <VBox spacing="8" GridPane.columnIndex="0" GridPane.rowIndex="1">
+                            <Label text="Alert Settings"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                            <VBox spacing="8">
+                                <CheckBox fx:id="enableCapacityWarningsCheck"
+                                          text="Enable capacity warnings"
+                                          selected="true"
+                                          style="-fx-font-size: 13px;
+                                                 -fx-text-fill: #034c81;"/>
+                                <CheckBox fx:id="soundAlertCheck"
+                                          text="Play sound on critical capacity"
+                                          selected="false"
+                                          style="-fx-font-size: 13px;
+                                                 -fx-text-fill: #034c81;"/>
+                            </VBox>
+                        </VBox>
+
+                        <!-- Alert Preview -->
+                        <VBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                            <Label text="Alert Preview"
+                                   style="-fx-font-size: 13px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+
+                            <VBox spacing="8">
+                                <!-- Warning Example -->
+                                <HBox spacing="8" alignment="CENTER_LEFT"
+                                      style="-fx-background-color: #fff3e0;
+                                             -fx-background-radius: 6;
+                                             -fx-padding: 8;">
+                                    <FontIcon iconLiteral="fas-exclamation-triangle" iconSize="14" iconColor="#ff9800"/>
+                                    <Label text="Warning: 80% capacity"
+                                           style="-fx-font-size: 11px;
+                                                  -fx-text-fill: #e65100;"/>
+                                </HBox>
+
+                                <!-- Critical Example -->
+                                <HBox spacing="8" alignment="CENTER_LEFT"
+                                      style="-fx-background-color: #ffebee;
+                                             -fx-background-radius: 6;
+                                             -fx-padding: 8;">
+                                    <FontIcon iconLiteral="fas-exclamation-circle" iconSize="14" iconColor="#ff6b6b"/>
+                                    <Label text="Critical: 95% capacity"
+                                           style="-fx-font-size: 11px;
+                                                  -fx-text-fill: #c62828;
+                                                  -fx-font-weight: bold;"/>
+                                </HBox>
+                            </VBox>
+                        </VBox>
+                    </GridPane>
+                </VBox>
+
+                <!-- ========== DANGER ZONE CARD ========== -->
+                <VBox spacing="20"
+                      style="-fx-background-color: white;
+                             -fx-background-radius: 16;
+                             -fx-padding: 25;
+                             -fx-border-color: #ffdddd;
+                             -fx-border-width: 2;
+                             -fx-border-radius: 16;
+                             -fx-effect: dropshadow(gaussian, rgba(255,107,107,0.1), 15, 0, 0, 3);">
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <StackPane style="-fx-background-color: #fff3f3;
+                                          -fx-background-radius: 10;
+                                          -fx-padding: 10;">
+                            <FontIcon iconLiteral="fas-exclamation-triangle" iconSize="20" iconColor="#ff6b6b"/>
+                        </StackPane>
+                        <VBox spacing="2">
+                            <Label text="Danger Zone"
+                                   style="-fx-font-size: 18px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #ff6b6b;"/>
+                            <Label text="Critical system operations - use with caution"
+                                   style="-fx-font-size: 12px;
+                                          -fx-text-fill: #7f858c;"/>
+                        </VBox>
+                    </HBox>
+
+                    <Separator style="-fx-background-color: #ffdddd;"/>
+
+                    <HBox spacing="15">
+                        <Button text="Reset to Defaults"
+                                onAction="#handleResetToDefaults"
+                                prefHeight="40"
+                                style="-fx-background-color: #fff3f3;
+                                       -fx-text-fill: #ff6b6b;
+                                       -fx-font-size: 13px;
+                                       -fx-font-weight: bold;
+                                       -fx-background-radius: 8;
+                                       -fx-border-color: #ffdddd;
+                                       -fx-border-radius: 8;
+                                       -fx-border-width: 1;
+                                       -fx-cursor: hand;">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-undo" iconSize="14" iconColor="#ff6b6b"/>
+                            </graphic>
+                        </Button>
+
+                        <Button text="Clear All Data"
+                                onAction="#handleClearAllData"
+                                prefHeight="40"
+                                style="-fx-background-color: #fff3f3;
+                                       -fx-text-fill: #ff6b6b;
+                                       -fx-font-size: 13px;
+                                       -fx-font-weight: bold;
+                                       -fx-background-radius: 8;
+                                       -fx-border-color: #ffdddd;
+                                       -fx-border-radius: 8;
+                                       -fx-border-width: 1;
+                                       -fx-cursor: hand;">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-trash-alt" iconSize="14" iconColor="#ff6b6b"/>
+                            </graphic>
+                        </Button>
+                    </HBox>
+                </VBox>
+
+            </VBox>
+        </content>
+    </ScrollPane>
+
+</VBox>

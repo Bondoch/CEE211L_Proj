@@ -1,93 +1,329 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
-<HBox spacing="20"
-      xmlns="http://javafx.com/javafx"
+<HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="com.example.triage.controllers.FacilitiesController"
-      style="-fx-padding: 20;">
+      spacing="20"
+      style="-fx-background-color: #f5f7fa;">
 
-    <!-- LEFT SIDEBAR -->
-    <VBox prefWidth="260"
-          spacing="12"
-          style="
-              -fx-background-color: #F4F6F7;
-              -fx-padding: 16;
-              -fx-background-radius: 14;
-              -fx-border-radius: 14;
-          "
-          styleClass="card sidebar-card">
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25"/>
+    </padding>
 
-        <Label text="Facilities" styleClass="section-title"/>
+    <!-- ========== LEFT SIDEBAR ========== -->
+    <VBox prefWidth="280" minWidth="280" maxWidth="280"
+          spacing="20"
+          style="-fx-background-color: #FFFFFF;
+                 -fx-background-radius: 16;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
 
-        <Label text="Facility"/>
-        <ComboBox fx:id="facilitySelector" promptText="Select Facility"/>
+        <padding>
+            <Insets top="25" right="20" bottom="25" left="20"/>
+        </padding>
 
-        <Label text="Floor"/>
-        <ComboBox fx:id="floorSelector" promptText="Select Floor"/>
-
-        <Separator/>
-
-        <!-- ACTIONS -->
+        <!-- Header -->
         <VBox spacing="8">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <StackPane style="-fx-background-color: linear-gradient(to right, #034c81, #2ca3fa);
+                                  -fx-background-radius: 8;
+                                  -fx-padding: 8;">
+                    <FontIcon iconLiteral="fas-hospital" iconSize="18" iconColor="white"/>
+                </StackPane>
+                <Label text="Facilities"
+                       style="-fx-font-size: 20px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #034c81;"/>
+            </HBox>
+            <Label text="Manage rooms and wards"
+                   style="-fx-text-fill: #7f858c;
+                          -fx-font-size: 12px;"/>
+        </VBox>
 
-            <Button text="+ Add Facility"
-                    maxWidth="Infinity"/>
+        <Separator style="-fx-background-color: #e8e8e8;"/>
 
-            <!-- EDIT BUTTON -->
+        <!-- Facility Selection -->
+        <VBox spacing="10">
+            <Label text="Facility"
+                   style="-fx-font-size: 13px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;"/>
+            <ComboBox fx:id="facilitySelector"
+                      promptText="Select Facility"
+                      maxWidth="Infinity"
+                      style="-fx-background-color: #f8f9fa;
+                             -fx-border-color: #e0e0e0;
+                             -fx-border-radius: 8;
+                             -fx-background-radius: 8;
+                             -fx-font-size: 13px;"/>
+        </VBox>
+
+        <!-- Floor Selection -->
+        <VBox spacing="10">
+            <Label text="Floor"
+                   style="-fx-font-size: 13px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;"/>
+            <ComboBox fx:id="floorSelector"
+                      promptText="Select Floor"
+                      maxWidth="Infinity"
+                      style="-fx-background-color: #f8f9fa;
+                             -fx-border-color: #e0e0e0;
+                             -fx-border-radius: 8;
+                             -fx-background-radius: 8;
+                             -fx-font-size: 13px;"/>
+        </VBox>
+
+        <Separator style="-fx-background-color: #e8e8e8;"/>
+
+        <!-- Action Buttons -->
+        <VBox spacing="12">
+            <Label text="Actions"
+                   style="-fx-font-size: 13px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;"/>
+
+            <!-- Add Facility Button -->
+            <Button text="Add Facility"
+                    maxWidth="Infinity"
+                    prefHeight="42"
+                    style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
+                           -fx-text-fill: white;
+                           -fx-font-size: 13px;
+                           -fx-font-weight: bold;
+                           -fx-background-radius: 8;
+                           -fx-cursor: hand;
+                           -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.3), 8, 0, 0, 2);">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <FontIcon iconLiteral="fas-plus-circle" iconSize="14" iconColor="white"/>
+                        <Label text="Add Facility"
+                               style="-fx-text-fill: white;
+                                      -fx-font-size: 13px;
+                                      -fx-font-weight: bold;"/>
+                    </HBox>
+                </graphic>
+            </Button>
+
+            <!-- Edit Facility Button -->
             <Button fx:id="editFacilityBtn"
                     text="Edit Facility"
-                    maxWidth="Infinity"/>
+                    maxWidth="Infinity"
+                    prefHeight="40"
+                    style="-fx-background-color: #f8f9fa;
+                           -fx-text-fill: #034c81;
+                           -fx-font-size: 13px;
+                           -fx-font-weight: bold;
+                           -fx-background-radius: 8;
+                           -fx-border-color: #e0e0e0;
+                           -fx-border-radius: 8;
+                           -fx-border-width: 1;
+                           -fx-cursor: hand;">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <FontIcon iconLiteral="fas-edit" iconSize="14" iconColor="#034c81"/>
+                        <Label text="Edit Facility"
+                               style="-fx-text-fill: #034c81;
+                                      -fx-font-size: 13px;
+                                      -fx-font-weight: bold;"/>
+                    </HBox>
+                </graphic>
+            </Button>
 
-            <!-- EDIT PANEL (HIDDEN) -->
+            <!-- Edit Panel (Hidden by default) -->
             <VBox fx:id="editFacilityPanel"
-                  spacing="8"
+                  spacing="10"
                   visible="false"
-                  managed="false">
+                  managed="false"
+                  style="-fx-background-color: #f8f9fa;
+                         -fx-background-radius: 8;
+                         -fx-padding: 15;
+                         -fx-border-color: #2ca3fa;
+                         -fx-border-radius: 8;
+                         -fx-border-width: 2;">
+
+                <Label text="Edit Mode"
+                       style="-fx-font-size: 12px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #2ca3fa;"/>
 
                 <ComboBox fx:id="facilityStatusBox"
-                          promptText="Select Status"
-                          maxWidth="Infinity"/>
+                          promptText="Change Status"
+                          maxWidth="Infinity"
+                          style="-fx-background-color: white;
+                                 -fx-border-color: #e0e0e0;
+                                 -fx-border-radius: 6;
+                                 -fx-background-radius: 6;
+                                 -fx-font-size: 12px;"/>
 
                 <Button fx:id="doneEditBtn"
                         text="Done"
-                        maxWidth="Infinity"/>
+                        maxWidth="Infinity"
+                        prefHeight="36"
+                        style="-fx-background-color: #2ca3fa;
+                               -fx-text-fill: white;
+                               -fx-font-size: 12px;
+                               -fx-font-weight: bold;
+                               -fx-background-radius: 6;
+                               -fx-cursor: hand;">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-check" iconSize="12" iconColor="white"/>
+                    </graphic>
+                </Button>
             </VBox>
 
-            <Button text="- Remove Facility"
-                    maxWidth="Infinity"/>
+            <!-- Remove Facility Button -->
+            <Button text="Remove Facility"
+                    maxWidth="Infinity"
+                    prefHeight="40"
+                    style="-fx-background-color: #fff3f3;
+                           -fx-text-fill: #ff6b6b;
+                           -fx-font-size: 13px;
+                           -fx-font-weight: bold;
+                           -fx-background-radius: 8;
+                           -fx-border-color: #ffdddd;
+                           -fx-border-radius: 8;
+                           -fx-border-width: 1;
+                           -fx-cursor: hand;">
+                <graphic>
+                    <HBox spacing="8" alignment="CENTER">
+                        <FontIcon iconLiteral="fas-trash-alt" iconSize="14" iconColor="#ff6b6b"/>
+                        <Label text="Remove Facility"
+                               style="-fx-text-fill: #ff6b6b;
+                                      -fx-font-size: 13px;
+                                      -fx-font-weight: bold;"/>
+                    </HBox>
+                </graphic>
+            </Button>
+        </VBox>
 
+        <!-- Spacer -->
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <!-- Info Card at Bottom -->
+        <VBox spacing="8"
+              style="-fx-background-color: linear-gradient(to bottom right, #f0f8ff, #e6f4ff);
+                     -fx-background-radius: 10;
+                     -fx-padding: 15;
+                     -fx-border-color: #2ca3fa;
+                     -fx-border-width: 1;
+                     -fx-border-radius: 10;">
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <FontIcon iconLiteral="fas-info-circle" iconSize="16" iconColor="#2ca3fa"/>
+                <Label text="Quick Tip"
+                       style="-fx-font-size: 12px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #034c81;"/>
+            </HBox>
+            <Label text="Select a facility and floor to view and manage room availability."
+                   wrapText="true"
+                   style="-fx-font-size: 11px;
+                          -fx-text-fill: #7f858c;"/>
         </VBox>
     </VBox>
 
-    <!-- MAIN DISPLAY -->
-    <VBox spacing="14"
-          HBox.hgrow="ALWAYS"
-          style="
-              -fx-background-color: white;
-              -fx-padding: 18;
-              -fx-background-radius: 14;
-              -fx-border-radius: 14;
-          "
-          styleClass="card main-card">
+    <!-- ========== MAIN CONTENT AREA ========== -->
+    <VBox spacing="20" HBox.hgrow="ALWAYS"
+          style="-fx-background-color: #FFFFFF;
+                 -fx-background-radius: 16;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
 
-        <Label fx:id="facilityTitle"
-               text="Select a facility"
-               styleClass="section-title"/>
+        <padding>
+            <Insets top="25" right="25" bottom="25" left="25"/>
+        </padding>
 
+        <!-- Header Section -->
+        <HBox spacing="15" alignment="CENTER_LEFT">
+            <VBox spacing="4" HBox.hgrow="ALWAYS">
+                <Label fx:id="facilityTitle"
+                       text="Select a facility"
+                       style="-fx-font-size: 24px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #034c81;"/>
+                <Label text="View and manage room availability"
+                       style="-fx-font-size: 13px;
+                              -fx-text-fill: #7f858c;"/>
+            </VBox>
+
+            <!-- Stats Summary -->
+            <HBox spacing="15" alignment="CENTER_RIGHT">
+                <VBox spacing="2" alignment="CENTER"
+                      style="-fx-background-color: #e8f5e9;
+                             -fx-background-radius: 8;
+                             -fx-padding: 10 15;">
+                    <Label text="Available"
+                           style="-fx-font-size: 11px;
+                                  -fx-text-fill: #4caf50;
+                                  -fx-font-weight: bold;"/>
+                    <Label fx:id="availableCount"
+                           text="0"
+                           style="-fx-font-size: 20px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #2e7d32;"/>
+                </VBox>
+
+                <VBox spacing="2" alignment="CENTER"
+                      style="-fx-background-color: #fff3e0;
+                             -fx-background-radius: 8;
+                             -fx-padding: 10 15;">
+                    <Label text="Occupied"
+                           style="-fx-font-size: 11px;
+                                  -fx-text-fill: #ff9800;
+                                  -fx-font-weight: bold;"/>
+                    <Label fx:id="occupiedCount"
+                           text="0"
+                           style="-fx-font-size: 20px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #e65100;"/>
+                </VBox>
+            </HBox>
+        </HBox>
+
+        <Separator style="-fx-background-color: #e8e8e8;"/>
+
+        <!-- Room Grid Area -->
         <ScrollPane fitToWidth="true"
                     fitToHeight="true"
                     VBox.vgrow="ALWAYS"
-                    style="-fx-background-color: transparent;">
-
-            <FlowPane fx:id="unitGrid"
-                      hgap="15"
-                      vgap="15"
-                      style="-fx-padding: 15;"/>
+                    style="-fx-background-color: transparent;
+                           -fx-background: transparent;">
+            <content>
+                <FlowPane fx:id="unitGrid"
+                          hgap="20"
+                          vgap="20"
+                          style="-fx-padding: 10;
+                                 -fx-background-color: transparent;"/>
+            </content>
         </ScrollPane>
 
+        <!-- Empty State (shown when no facility selected) -->
+        <VBox fx:id="emptyState"
+              spacing="15"
+              alignment="CENTER"
+              VBox.vgrow="ALWAYS"
+              style="-fx-background-color: #f8f9fa;
+                     -fx-background-radius: 12;
+                     -fx-padding: 50;">
+            <StackPane style="-fx-background-color: #e8e8e8;
+                              -fx-background-radius: 50;
+                              -fx-padding: 25;">
+                <FontIcon iconLiteral="fas-hospital-alt" iconSize="48" iconColor="#c9bbaa"/>
+            </StackPane>
+            <Label text="No Facility Selected"
+                   style="-fx-font-size: 18px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #7f858c;"/>
+            <Label text="Please select a facility and floor from the left sidebar to view rooms."
+                   wrapText="true"
+                   textAlignment="CENTER"
+                   style="-fx-font-size: 13px;
+                          -fx-text-fill: #c9bbaa;"/>
+        </VBox>
     </VBox>
 
 </HBox>

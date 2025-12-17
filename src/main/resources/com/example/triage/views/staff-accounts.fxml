@@ -6,62 +6,164 @@
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.triage.controllers.StaffAccountsController"
-            style="-fx-padding: 20;">
+            style="-fx-padding: 20;
+                   -fx-background-color: #f5f7fa;">
 
     <center>
         <VBox spacing="20"
               maxWidth="Infinity"
               VBox.vgrow="ALWAYS">
 
-            <!-- ON SHIFT STAFF SECTION -->
-            <VBox spacing="10"
-                  styleClass="card"
-                  maxWidth="Infinity">
+            <!-- ================= ON-SHIFT STAFF ================= -->
+            <VBox spacing="12"
+                  maxWidth="Infinity"
+                  style="-fx-background-color: #ffffff;
+                         -fx-background-radius: 16;
+                         -fx-padding: 20;
+                         -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
+
                 <Label text="On-Shift Staff"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+                       style="-fx-font-size: 18px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #034c81;" />
 
                 <FlowPane fx:id="onShiftContainer"
-                          hgap="10"
-                          vgap="10"
+                          hgap="12"
+                          vgap="12"
                           prefHeight="150"
-                          style="-fx-background-color: #FFFFFF; -fx-padding: 10;" />
+                          style="-fx-background-color: #f8f9fa;
+                                 -fx-background-radius: 10;
+                                 -fx-padding: 15;" />
             </VBox>
 
-            <!-- ALL STAFF SECTION -->
-            <VBox spacing="10"
-                  styleClass="card"
+            <!-- ================= ALL STAFF ================= -->
+            <VBox spacing="14"
                   maxWidth="Infinity"
-                  VBox.vgrow="ALWAYS">
+                  VBox.vgrow="ALWAYS"
+                  style="-fx-background-color: #ffffff;
+             -fx-background-radius: 16;
+             -fx-padding: 20;
+             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
 
+                <!-- Section Title -->
                 <Label text="All Staff"
-                       style="-fx-font-size: 18px; -fx-font-weight: bold;" />
+                       style="-fx-font-size: 18px;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #034c81;" />
 
-                <!-- HEADER ROW -->
-                <GridPane hgap="10" styleClass="table-header">
+                <!-- ================= TABLE HEADER ================= -->
+                <GridPane alignment="CENTER_LEFT"
+                          style="-fx-background-color: #f8f9fa;
+                     -fx-border-color: #e0e0e0;
+                     -fx-border-width: 0 0 1 0;">
+
                     <columnConstraints>
-                        <ColumnConstraints prefWidth="40"/>
-                        <ColumnConstraints percentWidth="30"/>
-                        <ColumnConstraints percentWidth="20"/>
-                        <ColumnConstraints percentWidth="30"/>
-                        <ColumnConstraints percentWidth="20"/>
+                        <!-- Checkbox -->
+                        <ColumnConstraints prefWidth="50"/>
+
+                        <!-- Name -->
+                        <ColumnConstraints percentWidth="42"/>
+
+                        <!-- Role -->
+                        <ColumnConstraints percentWidth="18"/>
+
+                        <!-- Facility -->
+                        <ColumnConstraints percentWidth="22"/>
+
+                        <!-- On Shift -->
+                        <ColumnConstraints percentWidth="10"/>
                     </columnConstraints>
 
-                    <Label text="✓" GridPane.columnIndex="0"/>
-                    <Label text="Name" GridPane.columnIndex="1"/>
-                    <Label text="Role" GridPane.columnIndex="2"/>
-                    <Label text="Facility" GridPane.columnIndex="3"/>
-                    <Label text="On Shift" GridPane.columnIndex="4"/>
+                    <!-- Checkbox -->
+                    <StackPane GridPane.columnIndex="0"
+                               style="-fx-padding: 10;
+                          -fx-border-color: #e0e0e0;
+                          -fx-border-width: 0 1 0 0;">
+                        <Label text="✓"
+                               style="-fx-font-size: 12px;
+                          -fx-text-fill: #7f858c;" />
+                    </StackPane>
+
+                    <!-- Name -->
+                    <StackPane GridPane.columnIndex="1"
+                               alignment="CENTER_LEFT"
+                               style="-fx-padding: 10;
+                          -fx-border-color: #e0e0e0;
+                          -fx-border-width: 0 1 0 0;">
+                        <Label text="Name"
+                               style="-fx-font-size: 12px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;" />
+                    </StackPane>
+
+                    <!-- Role -->
+                    <StackPane GridPane.columnIndex="2"
+                               alignment="CENTER"
+                               style="-fx-padding: 10;
+                          -fx-border-color: #e0e0e0;
+                          -fx-border-width: 0 1 0 0;">
+                        <Label text="Role"
+                               style="-fx-font-size: 12px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;" />
+                    </StackPane>
+
+                    <!-- Facility -->
+                    <StackPane GridPane.columnIndex="3"
+                               alignment="CENTER"
+                               style="-fx-padding: 10;
+                          -fx-border-color: #e0e0e0;
+                          -fx-border-width: 0 1 0 0;">
+                        <Label text="Facility"
+                               style="-fx-font-size: 12px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;" />
+                    </StackPane>
+
+                    <!-- On Shift -->
+                    <StackPane GridPane.columnIndex="4"
+                               alignment="CENTER"
+                               style="-fx-padding: 10;">
+                        <Label text="On Shift"
+                               style="-fx-font-size: 12px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;" />
+                    </StackPane>
+
                 </GridPane>
 
-                <!-- BODY (SCROLLABLE) -->
-                <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
-                    <VBox fx:id="staffRows" spacing="6"/>
+                <!-- ================= TABLE BODY ================= -->
+                <ScrollPane fitToWidth="true"
+                            VBox.vgrow="ALWAYS"
+                            style="-fx-background-color: transparent;
+                       -fx-background: transparent;">
+
+                    <content>
+                        <VBox fx:id="staffRows"
+                              spacing="6"
+                              style="-fx-padding: 8 0 8 0;" />
+                    </content>
                 </ScrollPane>
 
-                <!-- ACTION BUTTONS -->
+                <!-- ================= ACTION BUTTONS ================= -->
                 <HBox spacing="10" alignment="CENTER_LEFT">
-                    <Button text="+ Add Staff"/>
-                    <Button text="Delete Selected"/>
+
+                    <Button text="+ Add Staff"
+                            style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
+                       -fx-text-fill: white;
+                       -fx-font-size: 13px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 8;
+                       -fx-cursor: hand;" />
+
+                    <Button text="Delete Selected"
+                            style="-fx-background-color: #f8f9fa;
+                       -fx-text-fill: #034c81;
+                       -fx-font-size: 13px;
+                       -fx-border-color: #e0e0e0;
+                       -fx-border-radius: 8;
+                       -fx-background-radius: 8;
+                       -fx-cursor: hand;" />
                 </HBox>
 
             </VBox>

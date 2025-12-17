@@ -1,103 +1,524 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <HBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      spacing="15"
-      style="-fx-padding: 20;">
+      fx:controller="com.example.triage.controllers.PatientsController"
+      spacing="20"
+      style="-fx-background-color: #f5f7fa;">
 
-    <!-- ================= LEFT SELECTOR PANEL ================= -->
-    <VBox spacing="15"
-          prefWidth="220"
-          style="-fx-background-color: #F4F6F7;
-                 -fx-padding: 15;
-                 -fx-background-radius: 10;">
+    <padding>
+        <Insets top="25" right="25" bottom="25" left="25"/>
+    </padding>
 
-        <Label text="Select Area"
-               style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+    <!-- ========== LEFT SELECTOR PANEL ========== -->
+    <VBox prefWidth="280" minWidth="280" maxWidth="280"
+          spacing="20"
+          style="-fx-background-color: #FFFFFF;
+                 -fx-background-radius: 16;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
 
-        <VBox spacing="5">
-            <Label text="Facility"/>
+        <padding>
+            <Insets top="25" right="20" bottom="25" left="20"/>
+        </padding>
+
+        <!-- Header -->
+        <VBox spacing="8">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <StackPane style="-fx-background-color: linear-gradient(to right, #034c81, #2ca3fa);
+                                  -fx-background-radius: 8;
+                                  -fx-padding: 8;">
+                    <FontIcon iconLiteral="fas-procedures" iconSize="18" iconColor="white"/>
+                </StackPane>
+                <Label text="Patients"
+                       style="-fx-font-size: 20px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #034c81;"/>
+            </HBox>
+            <Label text="Filter by location"
+                   style="-fx-text-fill: #7f858c;
+                          -fx-font-size: 12px;"/>
+        </VBox>
+
+        <Separator style="-fx-background-color: #e8e8e8;"/>
+
+        <!-- Facility Selection -->
+        <VBox spacing="10">
+            <Label text="Facility"
+                   style="-fx-font-size: 13px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;"/>
             <ComboBox fx:id="facilityCombo"
-                      promptText="Choose Facility"/>
+                      promptText="Select Facility"
+                      maxWidth="Infinity"
+                      style="-fx-background-color: #f8f9fa;
+                             -fx-border-color: #e0e0e0;
+                             -fx-border-radius: 8;
+                             -fx-background-radius: 8;
+                             -fx-font-size: 13px;"/>
         </VBox>
 
-        <VBox spacing="5">
-            <Label text="Floor"/>
+        <!-- Floor Selection -->
+        <VBox spacing="10">
+            <Label text="Floor"
+                   style="-fx-font-size: 13px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;"/>
             <ComboBox fx:id="floorCombo"
-                      promptText="Choose Floor"/>
+                      promptText="Select Floor"
+                      maxWidth="Infinity"
+                      style="-fx-background-color: #f8f9fa;
+                             -fx-border-color: #e0e0e0;
+                             -fx-border-radius: 8;
+                             -fx-background-radius: 8;
+                             -fx-font-size: 13px;"/>
         </VBox>
 
+        <Separator style="-fx-background-color: #e8e8e8;"/>
+
+        <!-- Quick Filters -->
+        <VBox spacing="12">
+            <Label text="Quick Filters"
+                   style="-fx-font-size: 13px;
+                  -fx-font-weight: bold;
+                  -fx-text-fill: #034c81;"/>
+
+            <!-- Severity Filter Toggle -->
+            <CheckBox fx:id="severityToggle"
+                      text="Severity"
+                      style="-fx-font-size: 12px;
+                 -fx-text-fill: #034c81;"/>
+
+            <!-- Severity Dropdown (secondary condition) -->
+            <ComboBox fx:id="severityBox"
+                      promptText="Select Severity"
+                      disable="true"
+                      maxWidth="Infinity"
+                      style="-fx-font-size: 12px;
+                 -fx-background-color: #f8f9fa;
+                 -fx-border-color: #e0e0e0;
+                 -fx-border-radius: 6;
+                 -fx-background-radius: 6;"/>
+
+            <!-- Sort Buttons -->
+            <ToggleButton fx:id="sortByAdmissionBtn"
+                          text="Sort by Admission Date"
+                          maxWidth="Infinity"
+                          style="
+    -fx-font-size: 12px;
+    -fx-background-color: #f8f9fa;
+    -fx-text-fill: #034c81;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6 10 6 10;
+    -fx-cursor: hand;
+"/>
+
+            <ToggleButton fx:id="sortByBedBtn"
+                          text="Sort by Bed / Room"
+                          maxWidth="Infinity"
+                          style="
+    -fx-font-size: 12px;
+    -fx-background-color: #f8f9fa;
+    -fx-text-fill: #034c81;
+    -fx-border-color: #e0e0e0;
+    -fx-border-radius: 6;
+    -fx-background-radius: 6;
+    -fx-padding: 6 10 6 10;
+    -fx-cursor: hand;
+"/>
+        </VBox>
+
+        <Separator style="-fx-background-color: #e8e8e8;"/>
+
+        <!-- Search -->
+        <VBox spacing="10">
+            <Label text="Search Patient"
+                   style="-fx-font-size: 13px;
+                          -fx-font-weight: bold;
+                          -fx-text-fill: #034c81;"/>
+            <TextField promptText="Patient ID or Name"
+                       style="-fx-background-color: #f8f9fa;
+                              -fx-border-color: #e0e0e0;
+                              -fx-border-radius: 8;
+                              -fx-background-radius: 8;
+                              -fx-font-size: 13px;
+                              -fx-prompt-text-fill: #c9bbaa;"/>
+        </VBox>
+
+        <!-- Spacer -->
+        <Region VBox.vgrow="ALWAYS"/>
+
+        <!-- Stats Card at Bottom -->
+        <VBox spacing="8"
+              style="-fx-background-color: linear-gradient(to bottom right, #f0f8ff, #e6f4ff);
+                     -fx-background-radius: 10;
+                     -fx-padding: 15;
+                     -fx-border-color: #2ca3fa;
+                     -fx-border-width: 1;
+                     -fx-border-radius: 10;">
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <FontIcon iconLiteral="fas-chart-pie" iconSize="16" iconColor="#2ca3fa"/>
+                <Label text="Statistics"
+                       style="-fx-font-size: 12px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #034c81;"/>
+            </HBox>
+            <HBox spacing="15" alignment="CENTER">
+                <VBox spacing="2" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <Label text="Total"
+                           style="-fx-font-size: 10px;
+                                  -fx-text-fill: #7f858c;"/>
+                    <Label fx:id="totalPatientsLabel"
+                           text="0"
+                           style="-fx-font-size: 18px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #034c81;"/>
+                </VBox>
+                <Separator orientation="VERTICAL"/>
+                <VBox spacing="2" alignment="CENTER" HBox.hgrow="ALWAYS">
+                    <Label text="Critical"
+                           style="-fx-font-size: 10px;
+                                  -fx-text-fill: #7f858c;"/>
+                    <Label fx:id="criticalPatientsLabel"
+                           text="0"
+                           style="-fx-font-size: 18px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #ff6b6b;"/>
+                </VBox>
+            </HBox>
+        </VBox>
     </VBox>
 
-    <!-- ================= RIGHT CONTENT AREA ================= -->
-    <StackPane fx:id="patientStack"
-               style="-fx-background-color: #ECF0F1;
-                      -fx-background-radius: 10;
-                      -fx-padding: 15;">
+    <!-- ========== RIGHT CONTENT AREA ========== -->
+    <StackPane fx:id="patientStack" HBox.hgrow="ALWAYS">
 
         <!-- ===== BASE LAYER: PATIENT GRID ===== -->
-        <VBox spacing="15">
+        <VBox spacing="20"
+              style="-fx-background-color: #FFFFFF;
+                     -fx-background-radius: 16;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
 
-            <!-- Selected Area Header -->
-            <Label fx:id="areaLabel"
-                   text="Inpatient Ward — Floor 2"
-                   style="-fx-font-size: 18px;
-                          -fx-font-weight: bold;" />
+            <padding>
+                <Insets top="25" right="25" bottom="25" left="25"/>
+            </padding>
 
-            <!-- Patient Cards -->
-            <FlowPane fx:id="patientGrid"
-                      hgap="15"
-                      vgap="15"
-                      prefWrapLength="800"/>
+            <!-- Header Section -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <VBox spacing="4" HBox.hgrow="ALWAYS">
+                    <Label fx:id="areaLabel"
+                           text="All Patients"
+                           style="-fx-font-size: 24px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #034c81;"/>
+                    <Label text="View patient information and status"
+                           style="-fx-font-size: 13px;
+                                  -fx-text-fill: #7f858c;"/>
+                </VBox>
 
+                <!-- Action Buttons -->
+                <HBox spacing="10">
+                    <Button text="Add Patient"
+                            prefHeight="40"
+                            style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
+                                   -fx-text-fill: white;
+                                   -fx-font-size: 13px;
+                                   -fx-font-weight: bold;
+                                   -fx-background-radius: 8;
+                                   -fx-cursor: hand;
+                                   -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.3), 8, 0, 0, 2);">
+                        <graphic>
+                            <HBox spacing="6" alignment="CENTER">
+                                <FontIcon iconLiteral="fas-user-plus" iconSize="14" iconColor="white"/>
+                                <Label text="Add Patient"
+                                       style="-fx-text-fill: white;
+                                              -fx-font-size: 13px;
+                                              -fx-font-weight: bold;"/>
+                            </HBox>
+                        </graphic>
+                    </Button>
+
+                    <Button prefHeight="40" prefWidth="40"
+                            style="-fx-background-color: #f8f9fa;
+                                   -fx-background-radius: 8;
+                                   -fx-border-color: #e0e0e0;
+                                   -fx-border-radius: 8;
+                                   -fx-border-width: 1;
+                                   -fx-cursor: hand;">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-sync-alt" iconSize="14" iconColor="#034c81"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+            </HBox>
+
+            <Separator style="-fx-background-color: #e8e8e8;"/>
+
+            <!-- Patient Cards Grid -->
+            <ScrollPane fitToWidth="true"
+                        fitToHeight="true"
+                        VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent;
+                               -fx-background: transparent;">
+                <content>
+                    <FlowPane fx:id="patientGrid"
+                              hgap="20"
+                              vgap="20"
+                              style="-fx-padding: 10;
+                                     -fx-background-color: transparent;"/>
+                </content>
+            </ScrollPane>
+
+            <!-- Empty State -->
+            <VBox fx:id="emptyState"
+                  spacing="15"
+                  alignment="CENTER"
+                  VBox.vgrow="ALWAYS"
+                  style="-fx-background-color: #f8f9fa;
+                         -fx-background-radius: 12;
+                         -fx-padding: 50;">
+                <StackPane style="-fx-background-color: #e8e8e8;
+                                  -fx-background-radius: 50;
+                                  -fx-padding: 25;">
+                    <FontIcon iconLiteral="fas-user-injured" iconSize="48" iconColor="#c9bbaa"/>
+                </StackPane>
+                <Label text="No Patients Found"
+                       style="-fx-font-size: 18px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #7f858c;"/>
+                <Label text="Select a facility and floor to view patients, or add a new patient."
+                       wrapText="true"
+                       textAlignment="CENTER"
+                       style="-fx-font-size: 13px;
+                              -fx-text-fill: #c9bbaa;"/>
+            </VBox>
         </VBox>
 
-        <!-- ===== OVERLAY LAYER: FLOATING DETAIL CARD ===== -->
+        <!-- ===== OVERLAY: FLOATING PATIENT DETAIL CARD ===== -->
+        <Pane fx:id="detailBackdrop"
+              visible="false"
+              managed="false"
+              style="-fx-background-color: transparent;"
+              StackPane.alignment="CENTER"/>
         <VBox fx:id="patientDetailCard"
               visible="false"
               managed="false"
-              spacing="10"
-              prefWidth="320"
+              spacing="18"
+              prefWidth="380"
+              maxWidth="380"
+              prefHeight="560"
+              maxHeight="560"
               style="-fx-background-color: white;
-                     -fx-padding: 15;
-                     -fx-background-radius: 12;
-                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 15, 0, 0, 5);">
+             -fx-background-radius: 16;
+             -fx-padding: 25;
+             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0, 0, 5);"
+              StackPane.alignment="CENTER">
 
             <!-- Header with Close Button -->
-            <HBox alignment="CENTER_LEFT">
-                <Label text="Patient Details"
-                       style="-fx-font-size: 16px;
-                              -fx-font-weight: bold;" />
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <StackPane style="-fx-background-color: linear-gradient(to right, #034c81, #2ca3fa);
+                                  -fx-background-radius: 8;
+                                  -fx-padding: 10;">
+                    <FontIcon iconLiteral="fas-user-injured" iconSize="20" iconColor="white"/>
+                </StackPane>
 
-                <Region HBox.hgrow="ALWAYS"/>
+                <VBox spacing="2" HBox.hgrow="ALWAYS">
+                    <Label text="Patient Details"
+                           style="-fx-font-size: 18px;
+                                  -fx-font-weight: bold;
+                                  -fx-text-fill: #034c81;"/>
+                    <Label text="Complete information"
+                           style="-fx-font-size: 11px;
+                                  -fx-text-fill: #7f858c;"/>
+                </VBox>
 
-                <Button text="✕"
-                        style="-fx-background-color: transparent;
-                               -fx-font-size: 14px;" />
+                <Button fx:id="closeDetailBtn"
+                        prefWidth="32" prefHeight="32"
+                        style="-fx-background-color: #f8f9fa;
+                               -fx-background-radius: 6;
+                               -fx-cursor: hand;
+                               -fx-border-color: #e0e0e0;
+                               -fx-border-radius: 6;
+                               -fx-border-width: 1;">
+                    <graphic>
+                        <FontIcon iconLiteral="fas-times" iconSize="14" iconColor="#7f858c"/>
+                    </graphic>
+                </Button>
             </HBox>
 
-            <Separator/>
+            <Separator style="-fx-background-color: #e8e8e8;"/>
 
-            <!-- Detail Content (PLACEHOLDERS) -->
-            <Label text="Name: John Doe"/>
-            <Label text="Age: 45"/>
-            <Label text="Severity: High"/>
-            <Label text="Bed: 2A"/>
+            <!-- Patient Info Grid -->
+            <VBox spacing="15" VBox.vgrow="NEVER">
+                <!-- Name -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <FontIcon iconLiteral="fas-user" iconSize="16" iconColor="#2ca3fa"/>
+                    <VBox spacing="2" HBox.hgrow="ALWAYS">
+                        <Label text="Full Name"
+                               style="-fx-font-size: 11px;
+                                      -fx-text-fill: #7f858c;"/>
+                        <Label fx:id="detailName"
+                               text="John Doe"
+                               style="-fx-font-size: 14px;
+                                      -fx-font-weight: bold;
+                                      -fx-text-fill: #034c81;"/>
+                    </VBox>
+                </HBox>
 
-            <Separator/>
+                <!-- Age & Gender -->
+                <HBox spacing="15">
+                    <HBox spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <FontIcon iconLiteral="fas-birthday-cake" iconSize="16" iconColor="#2ca3fa"/>
+                        <VBox spacing="2">
+                            <Label text="Age"
+                                   style="-fx-font-size: 11px;
+                                          -fx-text-fill: #7f858c;"/>
+                            <Label fx:id="detailAge"
+                                   text="45"
+                                   style="-fx-font-size: 14px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                        </VBox>
+                    </HBox>
+                    <Separator orientation="VERTICAL"/>
+                    <HBox spacing="10" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <FontIcon iconLiteral="fas-venus-mars" iconSize="16" iconColor="#2ca3fa"/>
+                        <VBox spacing="2">
+                            <Label text="Gender"
+                                   style="-fx-font-size: 11px;
+                                          -fx-text-fill: #7f858c;"/>
+                            <Label fx:id="detailGender"
+                                   text="Male"
+                                   style="-fx-font-size: 14px;
+                                          -fx-font-weight: bold;
+                                          -fx-text-fill: #034c81;"/>
+                        </VBox>
+                    </HBox>
+                </HBox>
+
+                <!-- Severity -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <FontIcon iconLiteral="fas-exclamation-triangle" iconSize="16" iconColor="#ff6b6b"/>
+                    <VBox spacing="2" HBox.hgrow="ALWAYS">
+                        <Label text="Severity Level"
+                               style="-fx-font-size: 11px;
+                                      -fx-text-fill: #7f858c;"/>
+                        <Label fx:id="detailSeverity"
+                               text="High"
+                               style="-fx-font-size: 14px;
+                                      -fx-font-weight: bold;
+                                      -fx-text-fill: #ff6b6b;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Bed/Room -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <FontIcon iconLiteral="fas-bed" iconSize="16" iconColor="#2ca3fa"/>
+                    <VBox spacing="2" HBox.hgrow="ALWAYS">
+                        <Label text="Assigned Bed"
+                               style="-fx-font-size: 11px;
+                                      -fx-text-fill: #7f858c;"/>
+                        <Label fx:id="detailBed"
+                               text="Room 2A - Bed 3"
+                               style="-fx-font-size: 14px;
+                                      -fx-font-weight: bold;
+                                      -fx-text-fill: #034c81;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Admission Date -->
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <FontIcon iconLiteral="fas-calendar-alt" iconSize="16" iconColor="#2ca3fa"/>
+                    <VBox spacing="2" HBox.hgrow="ALWAYS">
+                        <Label text="Admission Date"
+                               style="-fx-font-size: 11px;
+                                      -fx-text-fill: #7f858c;"/>
+                        <Label fx:id="detailAdmission"
+                               text="Dec 15, 2024 - 08:30 AM"
+                               style="-fx-font-size: 14px;
+                                      -fx-font-weight: bold;
+                                      -fx-text-fill: #034c81;"/>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <Separator style="-fx-background-color: #e8e8e8;"/>
 
             <!-- Action Buttons -->
-            <HBox spacing="10">
-                <Button text="Edit"/>
-                <Button text="Refer"/>
-                <Button text="Discharge"/>
-            </HBox>
+            <VBox spacing="10" VBox.vgrow="NEVER">
+                <Label text="Actions"
+                       style="-fx-font-size: 12px;
+                              -fx-font-weight: bold;
+                              -fx-text-fill: #034c81;"/>
+
+                <HBox spacing="10">
+                    <Button text="Edit"
+                            prefHeight="40"
+                            HBox.hgrow="ALWAYS"
+                            style="-fx-background-color: #f8f9fa;
+                                   -fx-text-fill: #034c81;
+                                   -fx-font-size: 13px;
+                                   -fx-font-weight: bold;
+                                   -fx-background-radius: 8;
+                                   -fx-border-color: #e0e0e0;
+                                   -fx-border-radius: 8;
+                                   -fx-border-width: 1;
+                                   -fx-cursor: hand;">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-edit" iconSize="14" iconColor="#034c81"/>
+                        </graphic>
+                    </Button>
+
+                    <Button text="Refer"
+                            prefHeight="40"
+                            HBox.hgrow="ALWAYS"
+                            style="-fx-background-color: #f8f9fa;
+                                   -fx-text-fill: #034c81;
+                                   -fx-font-size: 13px;
+                                   -fx-font-weight: bold;
+                                   -fx-background-radius: 8;
+                                   -fx-border-color: #e0e0e0;
+                                   -fx-border-radius: 8;
+                                   -fx-border-width: 1;
+                                   -fx-cursor: hand;">
+                        <graphic>
+                            <FontIcon iconLiteral="fas-share" iconSize="14" iconColor="#034c81"/>
+                        </graphic>
+                    </Button>
+                </HBox>
+
+                <Button text="Discharge Patient"
+                        prefHeight="44"
+                        maxWidth="Infinity"
+                        style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
+                               -fx-text-fill: white;
+                               -fx-font-size: 13px;
+                               -fx-font-weight: bold;
+                               -fx-background-radius: 8;
+                               -fx-cursor: hand;
+                               -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.3), 8, 0, 0, 2);">
+                    <graphic>
+                        <HBox spacing="8" alignment="CENTER">
+                            <FontIcon iconLiteral="fas-sign-out-alt" iconSize="14" iconColor="white"/>
+                            <Label text="Discharge Patient"
+                                   style="-fx-text-fill: white;
+                                          -fx-font-size: 13px;
+                                          -fx-font-weight: bold;"/>
+                        </HBox>
+                    </graphic>
+                </Button>
+            </VBox>
 
         </VBox>
 
     </StackPane>
 
 </HBox>
+
+        <!-- here -->
