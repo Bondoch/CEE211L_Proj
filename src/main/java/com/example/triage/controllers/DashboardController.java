@@ -3,50 +3,46 @@ package com.example.triage.controllers;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.layout.*;
-import javafx.util.Duration;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Label;
-import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.application.Platform;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class DashboardController {
 
     @FXML private BorderPane sidebar;
     @FXML private Pane overlay;
+    @FXML private StackPane contentWrapper;
+    @FXML private BorderPane contentArea;
+
     @FXML private HBox itemDashboard;
     @FXML private HBox itemPatients;
     @FXML private HBox itemFacilities;
     @FXML private HBox itemStaff;
     @FXML private HBox itemSettings;
-    @FXML private HBox itemLogout;
+
     @FXML private Button menuButton;
-    @FXML private StackPane contentWrapper;
     @FXML private Label titleLabel;
-    @FXML private BorderPane contentArea;
     @FXML private VBox logoutPanel;
 
     private boolean menuOpen = false;
+
     private static final double SIDEBAR_WIDTH = 240;
-    private static final double TOP_BAR_HEIGHT = 65;
+
+    /* ================= INITIALIZE ================= */
 
     @FXML
     public void initialize() {
 
-        /* ================================
-           SIDEBAR — CRITICAL FIX
-           ================================ */
+        /* --- Sidebar initial state --- */
+        sidebar.setTranslateX(-SIDEBAR_WIDTH);
+        sidebar.setVisible(true);
 
-        sidebar.setTranslateX(-SIDEBAR_WIDTH);   // hidden by default
-        sidebar.setVisible(true);                // always visible logically
-
-        /* ================================
-           OVERLAY
-           ================================ */
-
+        /* --- Overlay setup --- */
         overlay.setVisible(false);
         overlay.setManaged(false);
 
@@ -57,22 +53,18 @@ public class DashboardController {
             if (menuOpen) toggleSidebar();
         });
 
-        /* ================================
-           MENU HANDLERS
-           ================================ */
-
+        /* --- Menu handlers --- */
         itemDashboard.setOnMouseClicked(e -> selectMenu(itemDashboard, "Dashboard"));
+        itemStaff.setOnMouseClicked(e -> selectMenu(itemStaff, "Staff Accounts"));
         itemPatients.setOnMouseClicked(e -> selectMenu(itemPatients, "Patients"));
         itemFacilities.setOnMouseClicked(e -> selectMenu(itemFacilities, "Facilities"));
-        itemStaff.setOnMouseClicked(e -> selectMenu(itemStaff, "Staff Accounts"));
         itemSettings.setOnMouseClicked(e -> selectMenu(itemSettings, "Settings"));
 
         selectMenu(itemDashboard, "Dashboard");
     }
 
-    /* ================================
-       SIDEBAR ANIMATION (UNCHANGED)
-       ================================ */
+    /* ================= SIDEBAR TOGGLE ================= */
+
     @FXML
     private void toggleSidebar() {
 
@@ -84,9 +76,9 @@ public class DashboardController {
             overlay.setVisible(true);
             overlay.setManaged(true);
 
-            // 🔑 CRITICAL FIX — Z-ORDER
-            overlay.toBack();      // overlay BEHIND sidebar
-            sidebar.toFront();     // sidebar ALWAYS on top
+            // 🔑 ABSOLUTE KEY FIX
+            overlay.toFront();     // overlay ABOVE content
+            sidebar.toFront();     // sidebar ABOVE overlay
 
             slide.setFromX(-SIDEBAR_WIDTH);
             slide.setToX(0);
@@ -116,9 +108,8 @@ public class DashboardController {
         fade.play();
     }
 
-    /* ================================
-       MENU SELECTION
-       ================================ */
+    /* ================= MENU SELECTION ================= */
+
     private void selectMenu(HBox selected, String name) {
 
         itemDashboard.getStyleClass().remove("active");
@@ -131,25 +122,17 @@ public class DashboardController {
         titleLabel.setText(name);
 
         switch (name) {
-            case "Dashboard":
-                loadContent("dashboard-home.fxml");
-                break;
-            case "Staff Accounts":
-                loadContent("staff-accounts.fxml");
-                break;
-            case "Patients":
-                loadContent("patients.fxml");
-                break;
-            case "Facilities":
-                loadContent("facilities.fxml");
-                break;
-            case "Settings":
-                loadSettingsWithStage();
-                break;
+            case "Dashboard" -> loadContent("dashboard-home.fxml");
+            case "Staff Accounts" -> loadContent("staff-accounts.fxml");
+            case "Patients" -> loadContent("patients.fxml");
+            case "Facilities" -> loadContent("facilities.fxml");
+            case "Settings" -> loadContent("settings.fxml");
         }
 
         if (menuOpen) toggleSidebar();
     }
+
+    /* ================= LOAD CONTENT ================= */
 
     private void loadContent(String fxml) {
         try {
@@ -157,41 +140,20 @@ public class DashboardController {
                     getClass().getResource("/com/example/triage/views/" + fxml)
             );
             Parent view = loader.load();
+
             contentArea.setCenter(view);
+
+            // 🔑 CRITICAL: restore overlay position after loading
+            overlay.toFront();
+            sidebar.toFront();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    /* ================================
-       LOAD SETTINGS WITH STAGE REFERENCE
-       ================================ */
-    private void loadSettingsWithStage() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/com/example/triage/views/settings.fxml")
-            );
-            Parent view = loader.load();
+    /* ================= LOGOUT ================= */
 
-            // Get controller and pass Stage reference
-            SettingsController settingsController = loader.getController();
-            if (settingsController != null) {
-                Stage stage = (Stage) sidebar.getScene().getWindow();
-                settingsController.setPrimaryStage(stage);
-
-                // Also pass current username if available
-                // settingsController.setCurrentUser(currentUsername);
-            }
-
-            contentArea.setCenter(view);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /* ================================
-       LOGOUT
-       ================================ */
     @FXML
     private void handleLogout() {
         overlay.setVisible(true);
@@ -212,7 +174,7 @@ public class DashboardController {
     }
 
     @FXML
-    public void performLogout() {
+    private void performLogout() {
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/example/triage/views/login-view.fxml")
