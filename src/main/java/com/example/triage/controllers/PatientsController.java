@@ -1,26 +1,45 @@
 package com.example.triage.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.animation.FadeTransition;
 import javafx.util.Duration;
 
+import com.example.triage.database.Patient;
+import com.example.triage.database.PatientDAO;
+
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import com.example.triage.controllers.PatientCardController;
+
+
 public class PatientsController {
 
+    // ===== LEFT PANEL =====
     @FXML private ComboBox<String> facilityCombo;
     @FXML private ComboBox<String> floorCombo;
+    @FXML private Label totalPatientsLabel;
+    @FXML private Label criticalPatientsLabel;
+
+    @FXML private CheckBox severityToggle;
+    @FXML private ComboBox<String> severityBox;
+    @FXML private ToggleButton sortByAdmissionBtn;
+    @FXML private ToggleButton sortByBedBtn;
+
+    // ===== CENTER AREA =====
+    @FXML private StackPane patientStack;
     @FXML private Label areaLabel;
     @FXML private FlowPane patientGrid;
-    @FXML private StackPane patientStack;
-    @FXML private VBox patientDetailCard;
-    @FXML private Button closeDetailBtn;
     @FXML private VBox emptyState;
 
-    // Detail card labels
+    // ===== DETAIL CARD =====
+    @FXML private Pane detailBackdrop;
+    @FXML private VBox patientDetailCard;
+    @FXML private Button closeDetailBtn;
+
     @FXML private Label detailName;
     @FXML private Label detailAge;
     @FXML private Label detailGender;
@@ -28,20 +47,30 @@ public class PatientsController {
     @FXML private Label detailBed;
     @FXML private Label detailAdmission;
 
-    // Statistics labels
-    @FXML private Label totalPatientsLabel;
-    @FXML private Label criticalPatientsLabel;
-    @FXML private ComboBox<String> severityFilter;
-    @FXML private ToggleButton sortByAdmissionBtn;
-    @FXML private ToggleButton sortByBedBtn;
-    @FXML private CheckBox severityToggle;
-    @FXML private ComboBox<String> severityBox;
-    @FXML private Pane detailBackdrop;
+    // ===== ADD / EDIT POPUP =====
+    @FXML private Pane addPatientBackdrop;
+    @FXML private VBox addPatientPopup;
+    @FXML private TextField addPatientName;
+    @FXML private TextField addPatientAge;
+    @FXML private TextField addPatientDiagnosis;
+    @FXML private ComboBox<String> addPatientGender;
+    @FXML private ComboBox<String> addPatientSeverity;
+
+    private final PatientDAO patientDAO = new PatientDAO();
+
+    private int selectedPatientId = -1;
+    private int selectedUnitId = -1;
+    private boolean isEditMode = false;
+
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("MMM dd, yyyy - hh:mm a");
+
+    // ================= INITIALIZE =================
 
     @FXML
     public void initialize() {
+        System.out.println("PatientsController loaded ✅");
 
-        // Populate facility dropdown
         facilityCombo.getItems().addAll(
                 "Emergency Room",
                 "Inpatient Ward",
@@ -49,245 +78,126 @@ public class PatientsController {
                 "Pediatric Ward",
                 "Surgery Ward"
         );
+        facilityCombo.setValue("Inpatient Ward");
 
-        // Populate floor dropdown
         floorCombo.getItems().addAll(
                 "Ground Floor",
                 "Floor 1",
                 "Floor 2",
                 "Floor 3"
         );
-
-        // Set default selection
-        facilityCombo.setValue("Inpatient Ward");
         floorCombo.setValue("Floor 2");
 
-        // ================================
-        // SEVERITY FILTER (STRUCTURE ONLY)
-        // ================================
+        if (severityBox != null)
+            severityBox.getItems().addAll("Low", "Moderate", "High", "Critical");
 
-        severityBox.getItems().addAll(
-                "Moderate",
-                "Under Observation",
-                "Critical"
-        );
+        if (addPatientGender != null)
+            addPatientGender.getItems().addAll("Male", "Female");
 
-        ToggleGroup sortGroup = new ToggleGroup();
-        sortByAdmissionBtn.setToggleGroup(sortGroup);
-        sortByBedBtn.setToggleGroup(sortGroup);
+        if (addPatientSeverity != null)
+            addPatientSeverity.getItems().addAll("Low", "Moderate", "High", "Critical");
 
-        // Dropdown only enabled when toggle is active
-        severityToggle.selectedProperty().addListener((obs, oldVal, newVal) -> {
-            severityBox.setDisable(!newVal);
-        });
+        patientDetailCard.setVisible(false);
+        patientDetailCard.setManaged(false);
+        detailBackdrop.setVisible(false);
+        detailBackdrop.setManaged(false);
 
-        // Ensure disabled by default
-        severityBox.setDisable(true);
+        emptyState.setVisible(false);
+        emptyState.setManaged(false);
 
-        // ================================
-
-        // Load initial data
-        loadPatients();
-
-        // Listeners for combo boxes
         facilityCombo.setOnAction(e -> loadPatients());
         floorCombo.setOnAction(e -> loadPatients());
 
-        // Close detail card
-        if (closeDetailBtn != null) {
-            closeDetailBtn.setOnAction(e -> hideDetailCard());
-        }
+        loadPatients();
+        severityToggle.selectedProperty().addListener((obs, wasOn, isOn) -> {
+            severityBox.setDisable(!isOn);
+            if (!isOn) severityBox.setValue(null);
+        });
 
-        // Hide detail card initially
-        if (patientDetailCard != null) {
-            patientDetailCard.setVisible(false);
-            patientDetailCard.setManaged(false);
-        }
     }
+
+    // ================= LOAD =================
 
     private void loadPatients() {
-        String facility = facilityCombo.getValue();
-        String floor = floorCombo.getValue();
-
-        if (facility == null || floor == null) {
-            return;
-        }
-
-        // Update area label
-        areaLabel.setText(facility + " — " + floor);
-
-        // Clear existing cards
         patientGrid.getChildren().clear();
 
-        // Generate sample patient cards (replace with actual database query)
-        int patientCount = 8;
-        int criticalCount = 2;
+        String facility = facilityCombo.getValue();
+        int floor = parseFloor(floorCombo.getValue());
 
-        for (int i = 1; i <= patientCount; i++) {
-            VBox card = createPatientCard(
-                    "PT-" + (1000 + i),
-                    "Patient " + i,
-                    45 + i,
-                    i % 2 == 0 ? "Male" : "Female",
-                    i <= criticalCount ? "Critical" : (i <= 4 ? "High" : "Moderate"),
-                    "Room " + (i % 5 + 1) + "A - Bed " + (i % 3 + 1),
-                    "Dec 15, 2024 - 08:30 AM"
-            );
-            patientGrid.getChildren().add(card);
+        areaLabel.setText(facility + " — Floor " + floor);
+
+        List<Patient> patients =
+                patientDAO.getPatientsByFacilityAndFloor(facility, floor);
+
+        int critical = 0;
+
+        for (Patient p : patients) {
+            if ("critical".equalsIgnoreCase(p.getSeverity())) critical++;
+            patientGrid.getChildren().add(createPatientCard(p));
         }
 
-        // Update statistics
-        totalPatientsLabel.setText(String.valueOf(patientCount));
-        criticalPatientsLabel.setText(String.valueOf(criticalCount));
+        totalPatientsLabel.setText(String.valueOf(patients.size()));
+        criticalPatientsLabel.setText(String.valueOf(critical));
 
-        // Hide empty state
-        if (emptyState != null) {
-            emptyState.setVisible(false);
-            emptyState.setManaged(false);
+        emptyState.setVisible(patients.isEmpty());
+        emptyState.setManaged(patients.isEmpty());
+    }
+
+    private int parseFloor(String value) {
+        if (value.equalsIgnoreCase("Ground Floor")) return 0;
+        return Integer.parseInt(value.replaceAll("\\D+", ""));
+    }
+
+    // ================= CARD =================
+
+    private VBox createPatientCard(Patient patient) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/triage/views/patient-card.fxml")
+            );
+
+            VBox card = loader.load();
+            PatientCardController controller = loader.getController();
+
+            controller.setPatient(patient, () ->
+                    showPatientDetails(
+                            patient.getId(),
+                            patient.getUnitId(),
+                            patient.getFullName(),
+                            patient.getAge(),
+                            patient.getGender(),
+                            capitalize(patient.getSeverity()),
+                            patient.getUnitLabel(),
+                            patient.getAdmissionDate()
+                                    .toLocalDateTime()
+                                    .format(FORMATTER)
+                    )
+            );
+
+            return card;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new VBox();
         }
     }
 
-    private VBox createPatientCard(String id, String name, int age, String gender,
-                                   String severity, String bed, String admission) {
-        VBox card = new VBox(12);
-        card.setPrefWidth(280);
-        card.setMinHeight(180);
-        card.setAlignment(Pos.TOP_LEFT);
-        card.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-background-radius: 12;" +
-                        "-fx-padding: 18;" +
-                        "-fx-border-color: #e8e8e8;" +
-                        "-fx-border-width: 1;" +
-                        "-fx-border-radius: 12;" +
-                        "-fx-cursor: hand;" +
-                        "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);"
-        );
 
-        // Hover effect
-        card.setOnMouseEntered(e -> {
-            card.setStyle(
-                    "-fx-background-color: white;" +
-                            "-fx-background-radius: 12;" +
-                            "-fx-padding: 18;" +
-                            "-fx-border-color: #2ca3fa;" +
-                            "-fx-border-width: 2;" +
-                            "-fx-border-radius: 12;" +
-                            "-fx-cursor: hand;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(44,163,250,0.2), 12, 0, 0, 3);"
-            );
-        });
+    // ================= DETAILS =================
 
-        card.setOnMouseExited(e -> {
-            card.setStyle(
-                    "-fx-background-color: white;" +
-                            "-fx-background-radius: 12;" +
-                            "-fx-padding: 18;" +
-                            "-fx-border-color: #e8e8e8;" +
-                            "-fx-border-width: 1;" +
-                            "-fx-border-radius: 12;" +
-                            "-fx-cursor: hand;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0, 0, 2);"
-            );
-        });
+    private void showPatientDetails(
+            int patientId,
+            int unitId,
+            String name,
+            int age,
+            String gender,
+            String severity,
+            String bed,
+            String admission
+    ) {
+        selectedPatientId = patientId;
+        selectedUnitId = unitId;
 
-        // Click to show details
-        card.setOnMouseClicked(e -> {
-            e.consume();
-            showPatientDetails(id, name, age, gender, severity, bed, admission);
-        });
-
-        // Header with ID and severity badge
-        HBox header = new HBox(10);
-        header.setAlignment(Pos.CENTER_LEFT);
-
-        Label idLabel = new Label(id);
-        idLabel.setStyle(
-                "-fx-font-size: 11px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #7f858c;"
-        );
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        Label severityBadge = new Label(severity);
-        severityBadge.setPadding(new Insets(4, 10, 4, 10));
-
-        String badgeColor = switch(severity) {
-            case "Critical" -> "-fx-background-color: #ffebee; -fx-text-fill: #c62828;";
-            case "High" -> "-fx-background-color: #fff3e0; -fx-text-fill: #e65100;";
-            case "Moderate" -> "-fx-background-color: #fff9c4; -fx-text-fill: #f57f17;";
-            default -> "-fx-background-color: #e8f5e9; -fx-text-fill: #2e7d32;";
-        };
-
-        severityBadge.setStyle(
-                badgeColor +
-                        "-fx-background-radius: 6;" +
-                        "-fx-font-size: 10px;" +
-                        "-fx-font-weight: bold;"
-        );
-
-        header.getChildren().addAll(idLabel, spacer, severityBadge);
-
-        // Patient name with icon
-        HBox nameBox = new HBox(8);
-        nameBox.setAlignment(Pos.CENTER_LEFT);
-
-        FontIcon userIcon = new FontIcon("fas-user");
-        userIcon.setIconSize(14);
-        userIcon.setIconColor(javafx.scene.paint.Color.web("#2ca3fa"));
-
-        Label nameLabel = new Label(name);
-        nameLabel.setStyle(
-                "-fx-font-size: 16px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #034c81;"
-        );
-
-        nameBox.getChildren().addAll(userIcon, nameLabel);
-
-        // Age and Gender
-        HBox infoBox = new HBox(15);
-        infoBox.setAlignment(Pos.CENTER_LEFT);
-
-        Label ageLabel = new Label(age + " yrs");
-        ageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #7f858c;");
-
-        Label genderLabel = new Label(gender);
-        genderLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #7f858c;");
-
-        infoBox.getChildren().addAll(ageLabel, createDot(), genderLabel);
-
-        // Bed assignment
-        HBox bedBox = new HBox(6);
-        bedBox.setAlignment(Pos.CENTER_LEFT);
-
-        FontIcon bedIcon = new FontIcon("fas-bed");
-        bedIcon.setIconSize(12);
-        bedIcon.setIconColor(javafx.scene.paint.Color.web("#7f858c"));
-
-        Label bedLabel = new Label(bed);
-        bedLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #7f858c;");
-
-        bedBox.getChildren().addAll(bedIcon, bedLabel);
-
-
-        card.getChildren().addAll(header, nameBox, infoBox, bedBox);
-
-        return card;
-    }
-
-    private Label createDot() {
-        Label dot = new Label("•");
-        dot.setStyle("-fx-font-size: 12px; -fx-text-fill: #c9bbaa;");
-        return dot;
-    }
-
-    private void showPatientDetails(String id, String name, int age, String gender,
-                                    String severity, String bed, String admission) {
-
-        // Populate detail card
         detailName.setText(name);
         detailAge.setText(String.valueOf(age));
         detailGender.setText(gender);
@@ -295,45 +205,120 @@ public class PatientsController {
         detailBed.setText(bed);
         detailAdmission.setText(admission);
 
-        // Update severity color
-        String severityColor = switch (severity) {
-            case "Critical" -> "#c62828";
-            case "High" -> "#e65100";
-            case "Moderate" -> "#f57f17";
-            default -> "#2e7d32";
-        };
-        detailSeverity.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: " + severityColor + ";"
-        );
+        detailBackdrop.setVisible(true);
+        detailBackdrop.setManaged(true);
 
-        // === SHOW DETAIL CARD ===
         patientDetailCard.setVisible(true);
         patientDetailCard.setManaged(true);
         patientDetailCard.toFront();
 
-        // Click outside to close
-        patientStack.setOnMouseClicked(e -> hideDetailCard());
-        patientDetailCard.setOnMouseClicked(e -> e.consume());
-
-        FadeTransition fade = new FadeTransition(Duration.millis(200), patientDetailCard);
-        fade.setFromValue(0);
-        fade.setToValue(1);
-        fade.play();
+        FadeTransition ft =
+                new FadeTransition(Duration.millis(180), patientDetailCard);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
     }
 
-    private void hideDetailCard() {
-        FadeTransition fade = new FadeTransition(Duration.millis(200), patientDetailCard);
-        fade.setFromValue(1);
-        fade.setToValue(0);
-        fade.setOnFinished(e -> {
-            patientDetailCard.setVisible(false);
-            patientDetailCard.setManaged(false);
-            patientStack.setOnMouseClicked(null);
-        });
-        fade.play();
+    @FXML
+    private void handleCloseDetail() {
+        patientDetailCard.setVisible(false);
+        patientDetailCard.setManaged(false);
+        detailBackdrop.setVisible(false);
+        detailBackdrop.setManaged(false);
     }
+
+    private String capitalize(String s) {
+        return s == null || s.isEmpty() ? "" :
+                s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
+
+    // ================= ADD PATIENT (FXML FIX) =================
+
+
+    // ================= ACTIONS =================
+
+    @FXML
+    public void handleEditPatient() {
+        isEditMode = true;
+    }
+
+    @FXML
+    public void handleDischargePatient() {
+        patientDAO.dischargePatient(selectedPatientId, selectedUnitId);
+        handleCloseDetail();
+        loadPatients();
+    }
+    // ================= ADD PATIENT POPUP =================
+
+    @FXML
+    public void showAddPatientPopup() {
+        isEditMode = false;
+
+        if (addPatientBackdrop != null) {
+            addPatientBackdrop.setVisible(true);
+            addPatientBackdrop.setManaged(true);
+        }
+
+        if (addPatientPopup != null) {
+            addPatientPopup.setVisible(true);
+            addPatientPopup.setManaged(true);
+            addPatientPopup.toFront();
+
+            FadeTransition ft =
+                    new FadeTransition(Duration.millis(180), addPatientPopup);
+            ft.setFromValue(0);
+            ft.setToValue(1);
+            ft.play();
+        }
+    }
+
+    @FXML
+    public void hideAddPatientPopup() {
+        if (addPatientBackdrop != null) {
+            addPatientBackdrop.setVisible(false);
+            addPatientBackdrop.setManaged(false);
+        }
+
+        if (addPatientPopup != null) {
+            addPatientPopup.setVisible(false);
+            addPatientPopup.setManaged(false);
+        }
+
+        clearAddPatientForm();
+    }
+
+    @FXML
+    public void confirmAddPatient() {
+
+        String name = addPatientName.getText();
+        int age = Integer.parseInt(addPatientAge.getText());
+        String gender = addPatientGender.getValue();
+        String diagnosis = addPatientDiagnosis.getText();
+        String severity = addPatientSeverity.getValue();
+
+        String facility = facilityCombo.getValue();
+        int floor = parseFloor(floorCombo.getValue());
+
+        if (isEditMode) {
+            patientDAO.updatePatient(
+                    selectedPatientId, name, age, gender, diagnosis, severity
+            );
+        } else {
+            patientDAO.addPatient(
+                    name, age, gender, diagnosis, severity, facility, floor
+            );
+        }
+
+        hideAddPatientPopup();
+        loadPatients();
+    }
+
+    private void clearAddPatientForm() {
+        if (addPatientName != null) addPatientName.clear();
+        if (addPatientAge != null) addPatientAge.clear();
+        if (addPatientDiagnosis != null) addPatientDiagnosis.clear();
+        if (addPatientGender != null) addPatientGender.setValue(null);
+        if (addPatientSeverity != null) addPatientSeverity.setValue(null);
+    }
+
 }
-
-// here

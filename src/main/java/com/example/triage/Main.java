@@ -7,7 +7,6 @@ import javafx.stage.Stage;
 import javafx.scene.Parent;
 
 import com.example.triage.services.UserService;
-
 public class Main extends Application {
 
     @Override

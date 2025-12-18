@@ -225,6 +225,7 @@
                 <!-- Action Buttons -->
                 <HBox spacing="10">
                     <Button text="Add Patient"
+                            onAction="#showAddPatientPopup"
                             prefHeight="40"
                             style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
                                    -fx-text-fill: white;
@@ -236,7 +237,7 @@
                         <graphic>
                             <HBox spacing="6" alignment="CENTER">
                                 <FontIcon iconLiteral="fas-user-plus" iconSize="14" iconColor="white"/>
-                                <Label text=""
+                                <Label text="Add Patient"
                                        style="-fx-text-fill: white;
                                               -fx-font-size: 13px;
                                               -fx-font-weight: bold;"/>
@@ -339,6 +340,7 @@
                 </VBox>
 
                 <Button fx:id="closeDetailBtn"
+                        onAction="#handleCloseDetail"
                         prefWidth="32" prefHeight="32"
                         style="-fx-background-color: #f8f9fa;
                                -fx-background-radius: 6;
@@ -516,6 +518,43 @@
             </VBox>
 
         </VBox>
+        <!-- ===== ADD PATIENT POPUP ===== -->
+        <Pane fx:id="addPatientBackdrop"
+              visible="false"
+              managed="false"
+              style="-fx-background-color: rgba(0,0,0,0.4);"
+              StackPane.alignment="CENTER"/>
+
+        <VBox fx:id="addPatientPopup"
+              visible="false"
+              managed="false"
+              spacing="12"
+              prefWidth="320"
+              style="-fx-background-color: white;
+             -fx-background-radius: 12;
+             -fx-padding: 20;"
+              StackPane.alignment="CENTER">
+
+            <Label text="Add Patient"
+                   style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+
+            <TextField fx:id="addPatientName" promptText="Full Name"/>
+            <TextField fx:id="addPatientAge" promptText="Age"/>
+            <TextField fx:id="addPatientDiagnosis" promptText="Diagnosis"/>
+
+            <ComboBox fx:id="addPatientGender" promptText="Gender"/>
+            <ComboBox fx:id="addPatientSeverity" promptText="Severity"/>
+
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+                <Button text="Cancel"
+                        onAction="#hideAddPatientPopup"/>
+                <Button text="Save Patient"
+                        onAction="#confirmAddPatient"/>
+            </HBox>
+        </VBox>
+
+
+
 
     </StackPane>
 

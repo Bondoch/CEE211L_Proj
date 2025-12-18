@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.triage.controllers.PatientCardController"
+      fx:id="root"
+      spacing="10"
+      prefWidth="260"
+      style="
+        -fx-background-color: white;
+        -fx-background-radius: 14;
+        -fx-padding: 15;
+        -fx-border-color: #e0e0e0;
+        -fx-border-radius: 14;
+        -fx-cursor: hand;
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);
+      ">
+
+    <!-- Patient Code + Severity -->
+    <HBox alignment="CENTER_LEFT">
+        <Label fx:id="codeLabel"
+               text="PT-1001"
+               style="
+           -fx-font-size: 12px;
+           -fx-font-weight: bold;
+           -fx-text-fill: #5f6368;
+       "/>
+
+
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <HBox style="
+        -fx-background-color: #FFE082;
+        -fx-background-radius: 999;
+        -fx-padding: 6 16;
+        -fx-background-insets: 0;
+     ">
+            <Label fx:id="severityLabel"
+                   text="Moderate"
+                   style="
+             -fx-font-size: 11px;
+             -fx-font-weight: bold;
+             -fx-text-fill: #8A5A00;
+           "/>
+        </HBox>
+
+
+
+
+
+    </HBox>
+
+    <!-- Name -->
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <FontIcon iconLiteral="fas-user" iconSize="14" iconColor="#2ca3fa"/>
+        <Label fx:id="nameLabel"
+               text="Patient Name"
+               style="
+           -fx-font-size: 15px;
+           -fx-font-weight: bold;
+           -fx-text-fill: #034c81;
+       "/>
+
+    </HBox>
+
+    <!-- Age & Gender -->
+    <Label fx:id="ageGenderLabel"
+           text="45 yrs    •    Male"
+           style="
+           -fx-font-size: 12px;
+           -fx-text-fill: #7f858c;
+       "/>
+
+
+    <!-- Unit -->
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <FontIcon iconLiteral="fas-bed" iconSize="14" iconColor="#7f858c"/>
+        <Label fx:id="unitLabel"
+               text="Room 2A - Bed 3"
+               style="-fx-font-size: 12px; -fx-text-fill: #7f858c;"/>
+    </HBox>
+
+</VBox>
