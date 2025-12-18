@@ -13,6 +13,7 @@ public class PatientDAO {
             String severity
     ) {
 
+
         // 1️⃣ LOW → auto discharge (no admission)
         if ("low".equalsIgnoreCase(severity)) {
             return;
@@ -169,14 +170,19 @@ public class PatientDAO {
         List<Patient> list = new ArrayList<>();
 
         String sql = """
-            SELECT p.*, u.id AS unit_id, u.label AS unit_label
-            FROM patients p
-            JOIN units u ON p.unit_id = u.id
-            JOIN floors f ON u.floor_id = f.id
-            JOIN facilities fac ON f.facility_id = fac.id
-            WHERE fac.name = ?
-              AND f.floor_number = ?
-              AND p.status = 'admitted'
+            SELECT p.*,
+                           u.id AS unit_id,
+                           u.label AS unit_label,
+                           fac.name AS facility_name,
+                           f.floor_number AS floor_number
+                    FROM patients p
+                    JOIN units u ON p.unit_id = u.id
+                    JOIN floors f ON u.floor_id = f.id
+                    JOIN facilities fac ON f.facility_id = fac.id
+                    WHERE fac.name = ?
+                      AND f.floor_number = ?
+                      AND p.status = 'admitted'
+                
         """;
 
         try (Connection conn = DBConnection.getConnection();
@@ -188,16 +194,19 @@ public class PatientDAO {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 list.add(new Patient(
-                        rs.getInt("id"),
-                        rs.getString("patient_code"),
-                        rs.getString("full_name"),
-                        rs.getInt("age"),
-                        rs.getString("gender"),
-                        rs.getString("severity"),
-                        rs.getTimestamp("admission_date"),
-                        rs.getInt("unit_id"),
-                        rs.getString("unit_label")
-                ));
+                                rs.getInt("id"),
+                                rs.getString("patient_code"),
+                                rs.getString("full_name"),
+                                rs.getInt("age"),
+                                rs.getString("gender"),
+                                rs.getString("severity"),
+                                rs.getTimestamp("admission_date"),
+                                rs.getInt("unit_id"),
+                                rs.getString("unit_label"),
+                                rs.getString("facility_name"),
+                                rs.getInt("floor_number")
+                        )
+                );
             }
 
         } catch (SQLException e) {
@@ -213,19 +222,29 @@ public class PatientDAO {
 
     // ================= DISCHARGE =================
     public void dischargePatient(int patientId, int unitId) {
-        try (Connection c = DBConnection.getConnection()) {
-            c.prepareStatement(
-                    "UPDATE patients SET status='discharged' WHERE id=" + patientId
-            ).execute();
 
-            c.prepareStatement(
-                    "UPDATE units SET status='AVAILABLE' WHERE id=" + unitId
-            ).execute();
+        String deletePatient = "DELETE FROM patients WHERE id = ?";
+        String freeUnit = "UPDATE units SET status = 'AVAILABLE' WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection()) {
+
+            // Delete patient
+            try (PreparedStatement ps = conn.prepareStatement(deletePatient)) {
+                ps.setInt(1, patientId);
+                ps.executeUpdate();
+            }
+
+            // Free the unit
+            try (PreparedStatement ps = conn.prepareStatement(freeUnit)) {
+                ps.setInt(1, unitId);
+                ps.executeUpdate();
+            }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
 
     // ================= INTERNAL =================

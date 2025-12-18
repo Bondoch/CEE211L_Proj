@@ -13,6 +13,8 @@ public class PatientCardController {
     @FXML private Label ageGenderLabel;
     @FXML private Label unitLabel;
     @FXML private Label severityLabel;
+    @FXML private Label facilityFloorLabel;
+
 
     private Patient patient;
 
@@ -46,6 +48,7 @@ public class PatientCardController {
                 patient.getAge() + " yrs • " + patient.getGender()
         );
         unitLabel.setText(patient.getUnitLabel());
+        facilityFloorLabel.setText(patient.getFacilityName() + " - F" + patient.getFloorNumber());
         severityLabel.setText(capitalize(patient.getSeverity()));
 
         applySeverityStyle(patient.getSeverity());

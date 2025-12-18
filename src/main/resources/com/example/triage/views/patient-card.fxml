@@ -84,5 +84,13 @@
                text="Room 2A - Bed 3"
                style="-fx-font-size: 12px; -fx-text-fill: #7f858c;"/>
     </HBox>
+    <!-- Facility & Floor -->
+    <HBox spacing="8" alignment="CENTER_LEFT">
+        <FontIcon iconLiteral="fas-hospital" iconSize="14" iconColor="#7f858c"/>
+        <Label fx:id="facilityFloorLabel"
+               text="Inpatient Ward - F1"
+               style="-fx-font-size: 12px; -fx-text-fill: #7f858c;"/>
+    </HBox>
+
 
 </VBox>

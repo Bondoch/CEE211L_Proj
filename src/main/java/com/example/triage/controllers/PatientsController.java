@@ -58,6 +58,9 @@ public class PatientsController {
     @FXML private TextField addPatientDiagnosis;
     @FXML private ComboBox<String> addPatientGender;
     @FXML private ComboBox<String> addPatientSeverity;
+    @FXML private Pane dischargeBackdrop;
+    @FXML private VBox dischargePopup;
+
 
     private final PatientDAO patientDAO = new PatientDAO();
 
@@ -281,10 +284,39 @@ public class PatientsController {
 
     @FXML
     public void handleDischargePatient() {
-        patientDAO.dischargePatient(selectedPatientId, selectedUnitId);
-        handleCloseDetail();
-        loadPatients();
+        dischargeBackdrop.setVisible(true);
+        dischargeBackdrop.setManaged(true);
+
+        dischargePopup.setVisible(true);
+        dischargePopup.setManaged(true);
+        dischargePopup.toFront();
+
+        FadeTransition ft =
+                new FadeTransition(Duration.millis(180), dischargePopup);
+        ft.setFromValue(0);
+        ft.setToValue(1);
+        ft.play();
     }
+
+    @FXML
+    private void cancelDischarge() {
+        dischargePopup.setVisible(false);
+        dischargePopup.setManaged(false);
+        dischargeBackdrop.setVisible(false);
+        dischargeBackdrop.setManaged(false);
+    }
+
+    @FXML
+    private void confirmDischarge() {
+        patientDAO.dischargePatient(selectedPatientId, selectedUnitId);
+
+        cancelDischarge();      // close confirm popup
+        handleCloseDetail();    // close patient info popup
+        loadPatients();         // refresh grid
+    }
+
+
+
     // ================= ADD PATIENT POPUP =================
 
     @FXML

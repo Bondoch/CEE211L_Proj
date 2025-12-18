@@ -16,12 +16,19 @@ public class Patient {
     private Timestamp admissionDate;
     private String unitLabel;
     private int unitId;
+    private String facilityName;
+    private int floorNumber;
+
 
     // ================= CONSTRUCTOR =================
     public Patient(int id, String patientCode, String fullName, int age,
                    String gender, String severity, Timestamp admissionDate,
-                   int unitId, String unitLabel) {
+                   int unitId, String unitLabel,
+                   String facilityName, int floorNumber) {
 
+
+        this.facilityName = facilityName;
+        this.floorNumber = floorNumber;
         this.id = id;
         this.patientCode = patientCode;
         this.fullName = fullName;
@@ -44,6 +51,9 @@ public class Patient {
     public Timestamp getAdmissionDate() { return admissionDate; }
     public String getUnitLabel() { return unitLabel; }
     public int getUnitId() { return unitId; }
+    public String getFacilityName() {return facilityName;}
+    public int getFloorNumber() {return floorNumber;}
+
 
     // ================= COMPATIBILITY ALIASES =================
     // 🔹 Fixes controller expectations WITHOUT changing logic
