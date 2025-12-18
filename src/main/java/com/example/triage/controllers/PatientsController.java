@@ -14,6 +14,9 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import com.example.triage.controllers.PatientCardController;
+import com.example.triage.database.FacilityDAO;
+import com.example.triage.database.FloorDAO;
+
 
 
 public class PatientsController {
@@ -64,6 +67,9 @@ public class PatientsController {
 
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("MMM dd, yyyy - hh:mm a");
+    private final FacilityDAO facilityDAO = new FacilityDAO();
+    private final FloorDAO floorDAO = new FloorDAO();
+
 
     // ================= INITIALIZE =================
 
@@ -71,23 +77,29 @@ public class PatientsController {
     public void initialize() {
         System.out.println("PatientsController loaded ✅");
 
-        facilityCombo.getItems().addAll(
-                "Emergency Room",
-                "Inpatient Ward",
-                "ICU",
-                "Pediatric Ward",
-                "Surgery Ward"
-        );
-        facilityCombo.setValue("Inpatient Ward");
+        // Clear grids & hide states initially
+        patientGrid.getChildren().clear();
+        emptyState.setVisible(true);
+        emptyState.setManaged(true);
 
-        floorCombo.getItems().addAll(
-                "Ground Floor",
-                "Floor 1",
-                "Floor 2",
-                "Floor 3"
-        );
-        floorCombo.setValue("Floor 2");
+        areaLabel.setText("Select Facility and Floor");
 
+        // Load facilities from DB
+        facilityCombo.getItems().setAll(facilityDAO.getAllFacilities());
+        facilityCombo.setValue(null); // force prompt text
+
+        // Floor disabled until facility selected
+        floorCombo.getItems().clear();
+        floorCombo.setDisable(true);
+        floorCombo.setValue(null);
+
+        // Facility selected → load floors
+        facilityCombo.setOnAction(e -> handleFacilitySelection());
+
+        // Floor selected → load patients
+        floorCombo.setOnAction(e -> handleFloorSelection());
+
+        // Other existing init logic
         if (severityBox != null)
             severityBox.getItems().addAll("Low", "Moderate", "High", "Critical");
 
@@ -97,28 +109,53 @@ public class PatientsController {
         if (addPatientSeverity != null)
             addPatientSeverity.getItems().addAll("Low", "Moderate", "High", "Critical");
 
-        patientDetailCard.setVisible(false);
-        patientDetailCard.setManaged(false);
-        detailBackdrop.setVisible(false);
-        detailBackdrop.setManaged(false);
-
-        emptyState.setVisible(false);
-        emptyState.setManaged(false);
-
-        facilityCombo.setOnAction(e -> loadPatients());
-        floorCombo.setOnAction(e -> loadPatients());
-
-        loadPatients();
         severityToggle.selectedProperty().addListener((obs, wasOn, isOn) -> {
             severityBox.setDisable(!isOn);
             if (!isOn) severityBox.setValue(null);
         });
-
     }
+
+    private void handleFacilitySelection() {
+        String facility = facilityCombo.getValue();
+        if (facility == null) return;
+
+        int facilityId = facilityDAO.getFacilityIdByName(facility);
+
+        floorCombo.getItems().setAll(
+                floorDAO.getFloorsByFacility(facilityId)
+        );
+
+        floorCombo.setDisable(false);
+        floorCombo.setValue(null);
+
+        // Reset UI
+        patientGrid.getChildren().clear();
+        emptyState.setVisible(true);
+        emptyState.setManaged(true);
+        areaLabel.setText(facility);
+    }
+
+    private void handleFloorSelection() {
+        if (facilityCombo.getValue() == null || floorCombo.getValue() == null)
+            return;
+
+        loadPatients();
+    }
+
+
+
 
     // ================= LOAD =================
 
     private void loadPatients() {
+
+        if (facilityCombo.getValue() == null || floorCombo.getValue() == null) {
+            patientGrid.getChildren().clear();
+            emptyState.setVisible(true);
+            emptyState.setManaged(true);
+            return;
+        }
+
         patientGrid.getChildren().clear();
 
         String facility = facilityCombo.getValue();
@@ -289,29 +326,20 @@ public class PatientsController {
 
     @FXML
     public void confirmAddPatient() {
-
         String name = addPatientName.getText();
         int age = Integer.parseInt(addPatientAge.getText());
         String gender = addPatientGender.getValue();
         String diagnosis = addPatientDiagnosis.getText();
         String severity = addPatientSeverity.getValue();
 
-        String facility = facilityCombo.getValue();
-        int floor = parseFloor(floorCombo.getValue());
-
-        if (isEditMode) {
-            patientDAO.updatePatient(
-                    selectedPatientId, name, age, gender, diagnosis, severity
-            );
-        } else {
-            patientDAO.addPatient(
-                    name, age, gender, diagnosis, severity, facility, floor
-            );
-        }
+        patientDAO.addPatientAutoAssign(
+                name, age, gender, diagnosis, severity
+        );
 
         hideAddPatientPopup();
         loadPatients();
     }
+
 
     private void clearAddPatientForm() {
         if (addPatientName != null) addPatientName.clear();

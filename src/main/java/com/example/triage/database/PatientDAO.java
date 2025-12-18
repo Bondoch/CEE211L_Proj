@@ -5,6 +5,94 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PatientDAO {
+    public void addPatientAutoAssign(
+            String fullName,
+            int age,
+            String gender,
+            String diagnosis,
+            String severity
+    ) {
+
+        // 1️⃣ LOW → auto discharge (no admission)
+        if ("low".equalsIgnoreCase(severity)) {
+            return;
+        }
+
+        // 2️⃣ CHOOSE FACILITY BASED ON SEVERITY  ✅⬅️ YOUR CODE GOES HERE
+        String targetFacility;
+
+        if ("critical".equalsIgnoreCase(severity)) {
+            targetFacility = "Emergency Room";
+        } else {
+            targetFacility = "Inpatient Ward";
+        }
+
+        // 3️⃣ FIND AVAILABLE UNIT (next step)
+        int unitId;
+        try {
+            unitId = findAvailableUnitByFacility(targetFacility);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // 4️⃣ INSERT PATIENT
+        String sql = """
+        INSERT INTO patients
+        (patient_code, full_name, age, gender, diagnosis, severity, unit_id, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'admitted')
+    """;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, "PT-" + System.currentTimeMillis() % 100000);
+            ps.setString(2, fullName);
+            ps.setInt(3, age);
+            ps.setString(4, gender);
+            ps.setString(5, diagnosis);
+            ps.setString(6, severity.toLowerCase());
+            ps.setInt(7, unitId);
+
+            ps.executeUpdate();
+            markUnitOccupied(unitId);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private int findAvailableUnitByFacility(String facility) throws SQLException {
+
+        String sql = """
+        SELECT u.id
+        FROM units u
+        JOIN floors f ON u.floor_id = f.id
+        JOIN facilities fac ON f.facility_id = fac.id
+        WHERE u.status = 'AVAILABLE'
+          AND fac.name = ?
+        ORDER BY f.floor_number ASC, u.id ASC
+        LIMIT 1
+    """;
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setString(1, facility);
+
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+        }
+
+        throw new SQLException("No available units in " + facility);
+    }
+
+
+
+
+
 
     // ================= ADD =================
     public void addPatient(
@@ -138,6 +226,7 @@ public class PatientDAO {
             e.printStackTrace();
         }
     }
+
 
     // ================= INTERNAL =================
     private int findAvailableUnit(String facility, int floor) throws SQLException {
