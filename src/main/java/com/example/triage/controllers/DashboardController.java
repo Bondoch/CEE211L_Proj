@@ -1,5 +1,6 @@
 package com.example.triage.controllers;
 
+import com.example.triage.services.SessionManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
@@ -30,19 +31,13 @@ public class DashboardController {
     @FXML private VBox logoutPanel;
 
     private boolean menuOpen = false;
-
     private static final double SIDEBAR_WIDTH = 240;
-
-    /* ================= INITIALIZE ================= */
 
     @FXML
     public void initialize() {
-
-        /* --- Sidebar initial state --- */
         sidebar.setTranslateX(-SIDEBAR_WIDTH);
         sidebar.setVisible(true);
 
-        /* --- Overlay setup --- */
         overlay.setVisible(false);
         overlay.setManaged(false);
 
@@ -53,7 +48,6 @@ public class DashboardController {
             if (menuOpen) toggleSidebar();
         });
 
-        /* --- Menu handlers --- */
         itemDashboard.setOnMouseClicked(e -> selectMenu(itemDashboard, "Dashboard"));
         itemStaff.setOnMouseClicked(e -> selectMenu(itemStaff, "Staff Accounts"));
         itemPatients.setOnMouseClicked(e -> selectMenu(itemPatients, "Patients"));
@@ -63,22 +57,17 @@ public class DashboardController {
         selectMenu(itemDashboard, "Dashboard");
     }
 
-    /* ================= SIDEBAR TOGGLE ================= */
-
     @FXML
     private void toggleSidebar() {
-
         TranslateTransition slide = new TranslateTransition(Duration.millis(250), sidebar);
         FadeTransition fade = new FadeTransition(Duration.millis(250), overlay);
 
         if (!menuOpen) {
-
             overlay.setVisible(true);
             overlay.setManaged(true);
 
-            // 🔑 ABSOLUTE KEY FIX
-            overlay.toFront();     // overlay ABOVE content
-            sidebar.toFront();     // sidebar ABOVE overlay
+            overlay.toFront();
+            sidebar.toFront();
 
             slide.setFromX(-SIDEBAR_WIDTH);
             slide.setToX(0);
@@ -89,7 +78,6 @@ public class DashboardController {
             menuOpen = true;
 
         } else {
-
             slide.setFromX(0);
             slide.setToX(-SIDEBAR_WIDTH);
 
@@ -108,10 +96,7 @@ public class DashboardController {
         fade.play();
     }
 
-    /* ================= MENU SELECTION ================= */
-
     private void selectMenu(HBox selected, String name) {
-
         itemDashboard.getStyleClass().remove("active");
         itemStaff.getStyleClass().remove("active");
         itemPatients.getStyleClass().remove("active");
@@ -132,8 +117,6 @@ public class DashboardController {
         if (menuOpen) toggleSidebar();
     }
 
-    /* ================= LOAD CONTENT ================= */
-
     private void loadContent(String fxml) {
         try {
             FXMLLoader loader = new FXMLLoader(
@@ -143,7 +126,6 @@ public class DashboardController {
 
             contentArea.setCenter(view);
 
-            // 🔑 CRITICAL: restore overlay position after loading
             overlay.toFront();
             sidebar.toFront();
 
@@ -151,8 +133,6 @@ public class DashboardController {
             e.printStackTrace();
         }
     }
-
-    /* ================= LOGOUT ================= */
 
     @FXML
     private void handleLogout() {
@@ -175,6 +155,9 @@ public class DashboardController {
 
     @FXML
     private void performLogout() {
+        // Clear session
+        SessionManager.getInstance().endSession();
+
         try {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/example/triage/views/login-view.fxml")
