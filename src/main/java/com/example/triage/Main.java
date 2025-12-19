@@ -7,6 +7,7 @@ import javafx.stage.Stage;
 import javafx.scene.Parent;
 
 import com.example.triage.services.UserService;
+import com.example.triage.services.CapacityMonitor; // ✅ ADD THIS IMPORT
 
 public class Main extends Application {
 
@@ -40,11 +41,23 @@ public class Main extends Application {
             String systemName = prefs.get("systemName", "LifeLine Triage System");
             stage.setTitle(systemName);
 
+            // ✅ INITIALIZE CAPACITY MONITORING
+            CapacityMonitor.getInstance().setPrimaryStage(stage);
+            System.out.println("✅ Capacity monitoring initialized");
+
             stage.show();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // ✅ CLEAN SHUTDOWN
+    @Override
+    public void stop() {
+        System.out.println("🛑 Application shutting down...");
+        CapacityMonitor.getInstance().stopMonitoring();
+        System.out.println("✅ Capacity monitoring stopped");
     }
 
     public static void main(String[] args) {

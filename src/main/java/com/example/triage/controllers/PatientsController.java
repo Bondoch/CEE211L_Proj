@@ -9,15 +9,14 @@ import javafx.util.Duration;
 
 import com.example.triage.database.Patient;
 import com.example.triage.database.PatientDAO;
-
-import java.io.IOException;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import com.example.triage.controllers.PatientCardController;
 import com.example.triage.database.FacilityDAO;
 import com.example.triage.database.FloorDAO;
 
-
+import java.io.IOException;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class PatientsController {
 
@@ -31,6 +30,7 @@ public class PatientsController {
     @FXML private ComboBox<String> severityBox;
     @FXML private ToggleButton sortByAdmissionBtn;
     @FXML private ToggleButton sortByBedBtn;
+    // ✅ REMOVED: @FXML private TextField searchField; (not in FXML)
 
     // ===== CENTER AREA =====
     @FXML private StackPane patientStack;
@@ -50,7 +50,7 @@ public class PatientsController {
     @FXML private Label detailBed;
     @FXML private Label detailAdmission;
 
-    // ===== ADD / EDIT POPUP =====
+    // ===== ADD POPUP =====
     @FXML private Pane addPatientBackdrop;
     @FXML private VBox addPatientPopup;
     @FXML private TextField addPatientName;
@@ -60,33 +60,32 @@ public class PatientsController {
     @FXML private ComboBox<String> addPatientSeverity;
 
     private final PatientDAO patientDAO = new PatientDAO();
-
-    private int selectedPatientId = -1;
-    private int selectedUnitId = -1;
-    private boolean isEditMode = false;
-
-    private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("MMM dd, yyyy - hh:mm a");
     private final FacilityDAO facilityDAO = new FacilityDAO();
     private final FloorDAO floorDAO = new FloorDAO();
 
+    private int selectedPatientId = -1;
+    private int selectedUnitId = -1;
+
+    private List<Patient> currentPatientList;
+
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("MMM dd, yyyy - hh:mm a");
 
     // ================= INITIALIZE =================
 
     @FXML
     public void initialize() {
-        System.out.println("PatientsController loaded ✅");
+        System.out.println("✅ PatientsController initialized");
 
-        // Clear grids & hide states initially
+        // Clear grids & hide states
         patientGrid.getChildren().clear();
         emptyState.setVisible(true);
         emptyState.setManaged(true);
-
         areaLabel.setText("Select Facility and Floor");
 
-        // Load facilities from DB
+        // Load facilities
         facilityCombo.getItems().setAll(facilityDAO.getAllFacilities());
-        facilityCombo.setValue(null); // force prompt text
+        facilityCombo.setValue(null);
 
         // Floor disabled until facility selected
         floorCombo.getItems().clear();
@@ -99,7 +98,7 @@ public class PatientsController {
         // Floor selected → load patients
         floorCombo.setOnAction(e -> handleFloorSelection());
 
-        // Other existing init logic
+        // Populate dropdowns
         if (severityBox != null)
             severityBox.getItems().addAll("Low", "Moderate", "High", "Critical");
 
@@ -109,10 +108,39 @@ public class PatientsController {
         if (addPatientSeverity != null)
             addPatientSeverity.getItems().addAll("Low", "Moderate", "High", "Critical");
 
+        // ✨ Severity toggle listener
         severityToggle.selectedProperty().addListener((obs, wasOn, isOn) -> {
             severityBox.setDisable(!isOn);
-            if (!isOn) severityBox.setValue(null);
+            if (!isOn) {
+                severityBox.setValue(null);
+                applyFiltersAndSort();
+            }
         });
+
+        // ✨ Severity box listener
+        severityBox.setOnAction(e -> applyFiltersAndSort());
+
+        // ✨ Sort button listeners
+        sortByAdmissionBtn.setOnAction(e -> {
+            if (sortByAdmissionBtn.isSelected()) {
+                sortByBedBtn.setSelected(false);
+            }
+            applyFiltersAndSort();
+        });
+
+        sortByBedBtn.setOnAction(e -> {
+            if (sortByBedBtn.isSelected()) {
+                sortByAdmissionBtn.setSelected(false);
+            }
+            applyFiltersAndSort();
+        });
+
+        // ✅ REMOVED: Search field listener (not in FXML)
+
+        // ✨ Backdrop click to close detail
+        if (detailBackdrop != null) {
+            detailBackdrop.setOnMouseClicked(e -> handleCloseDetail());
+        }
     }
 
     private void handleFacilitySelection() {
@@ -120,10 +148,7 @@ public class PatientsController {
         if (facility == null) return;
 
         int facilityId = facilityDAO.getFacilityIdByName(facility);
-
-        floorCombo.getItems().setAll(
-                floorDAO.getFloorsByFacility(facilityId)
-        );
+        floorCombo.getItems().setAll(floorDAO.getFloorsByFacility(facilityId));
 
         floorCombo.setDisable(false);
         floorCombo.setValue(null);
@@ -142,13 +167,10 @@ public class PatientsController {
         loadPatients();
     }
 
+    // ================= LOAD PATIENTS =================
 
-
-
-    // ================= LOAD =================
-
-    private void loadPatients() {
-
+    @FXML
+    public void loadPatients() {
         if (facilityCombo.getValue() == null || floorCombo.getValue() == null) {
             patientGrid.getChildren().clear();
             emptyState.setVisible(true);
@@ -156,18 +178,55 @@ public class PatientsController {
             return;
         }
 
-        patientGrid.getChildren().clear();
-
         String facility = facilityCombo.getValue();
         int floor = parseFloor(floorCombo.getValue());
 
         areaLabel.setText(facility + " — Floor " + floor);
 
-        List<Patient> patients =
-                patientDAO.getPatientsByFacilityAndFloor(facility, floor);
+        currentPatientList = patientDAO.getPatientsByFacilityAndFloor(facility, floor);
+
+        applyFiltersAndSort();
+    }
+
+    // ✨ Apply all filters and sorting
+    private void applyFiltersAndSort() {
+        if (currentPatientList == null) return;
+
+        List<Patient> filtered = currentPatientList.stream()
+                .filter(this::matchesFilters)
+                .collect(Collectors.toList());
+
+        // Apply sorting
+        if (sortByAdmissionBtn.isSelected()) {
+            filtered.sort(Comparator.comparing(Patient::getAdmissionDate).reversed());
+        } else if (sortByBedBtn.isSelected()) {
+            filtered.sort(Comparator.comparing(Patient::getUnitLabel));
+        }
+
+        // Update UI
+        displayPatients(filtered);
+    }
+
+    // ✨ Check if patient matches filters
+    private boolean matchesFilters(Patient patient) {
+        // Severity filter
+        if (severityToggle.isSelected() && severityBox.getValue() != null) {
+            String selectedSeverity = severityBox.getValue().toLowerCase();
+            if (!patient.getSeverity().equalsIgnoreCase(selectedSeverity)) {
+                return false;
+            }
+        }
+
+        // ✅ REMOVED: Search filter (not in FXML)
+
+        return true;
+    }
+
+    // ✨ Display filtered patients
+    private void displayPatients(List<Patient> patients) {
+        patientGrid.getChildren().clear();
 
         int critical = 0;
-
         for (Patient p : patients) {
             if ("critical".equalsIgnoreCase(p.getSeverity())) critical++;
             patientGrid.getChildren().add(createPatientCard(p));
@@ -185,7 +244,7 @@ public class PatientsController {
         return Integer.parseInt(value.replaceAll("\\D+", ""));
     }
 
-    // ================= CARD =================
+    // ================= CREATE CARD =================
 
     private VBox createPatientCard(Patient patient) {
         try {
@@ -219,8 +278,7 @@ public class PatientsController {
         }
     }
 
-
-    // ================= DETAILS =================
+    // ================= PATIENT DETAILS =================
 
     private void showPatientDetails(
             int patientId,
@@ -242,15 +300,18 @@ public class PatientsController {
         detailBed.setText(bed);
         detailAdmission.setText(admission);
 
-        detailBackdrop.setVisible(true);
-        detailBackdrop.setManaged(true);
+        // ✨ Show backdrop
+        if (detailBackdrop != null) {
+            detailBackdrop.setVisible(true);
+            detailBackdrop.setManaged(true);
+            detailBackdrop.setStyle("-fx-background-color: rgba(0,0,0,0.4);");
+        }
 
         patientDetailCard.setVisible(true);
         patientDetailCard.setManaged(true);
         patientDetailCard.toFront();
 
-        FadeTransition ft =
-                new FadeTransition(Duration.millis(180), patientDetailCard);
+        FadeTransition ft = new FadeTransition(Duration.millis(180), patientDetailCard);
         ft.setFromValue(0);
         ft.setToValue(1);
         ft.play();
@@ -260,37 +321,52 @@ public class PatientsController {
     private void handleCloseDetail() {
         patientDetailCard.setVisible(false);
         patientDetailCard.setManaged(false);
-        detailBackdrop.setVisible(false);
-        detailBackdrop.setManaged(false);
+
+        if (detailBackdrop != null) {
+            detailBackdrop.setVisible(false);
+            detailBackdrop.setManaged(false);
+        }
     }
 
-    private String capitalize(String s) {
-        return s == null || s.isEmpty() ? "" :
-                s.substring(0, 1).toUpperCase() + s.substring(1);
-    }
-
-    // ================= ADD PATIENT (FXML FIX) =================
-
-
-    // ================= ACTIONS =================
-
+    // ✨ Edit Patient (placeholder)
     @FXML
     public void handleEditPatient() {
-        isEditMode = true;
+        System.out.println("✏️ Edit Patient ID: " + selectedPatientId);
+
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Edit Patient");
+        alert.setHeaderText("Edit Patient Feature");
+        alert.setContentText("Edit patient functionality will be implemented here.\nPatient ID: " + selectedPatientId);
+        alert.showAndWait();
+
+        // TODO: Implement edit patient popup or navigation
     }
 
     @FXML
     public void handleDischargePatient() {
-        patientDAO.dischargePatient(selectedPatientId, selectedUnitId);
-        handleCloseDetail();
-        loadPatients();
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Discharge Patient");
+        confirm.setHeaderText("Confirm Patient Discharge");
+        confirm.setContentText("Are you sure you want to discharge this patient?");
+
+        if (confirm.showAndWait().get() == ButtonType.OK) {
+            patientDAO.dischargePatient(selectedPatientId, selectedUnitId);
+
+            Alert success = new Alert(Alert.AlertType.INFORMATION);
+            success.setTitle("Success");
+            success.setHeaderText("Patient Discharged");
+            success.setContentText("Patient has been successfully discharged.");
+            success.showAndWait();
+
+            handleCloseDetail();
+            loadPatients();
+        }
     }
+
     // ================= ADD PATIENT POPUP =================
 
     @FXML
     public void showAddPatientPopup() {
-        isEditMode = false;
-
         if (addPatientBackdrop != null) {
             addPatientBackdrop.setVisible(true);
             addPatientBackdrop.setManaged(true);
@@ -301,8 +377,7 @@ public class PatientsController {
             addPatientPopup.setManaged(true);
             addPatientPopup.toFront();
 
-            FadeTransition ft =
-                    new FadeTransition(Duration.millis(180), addPatientPopup);
+            FadeTransition ft = new FadeTransition(Duration.millis(180), addPatientPopup);
             ft.setFromValue(0);
             ft.setToValue(1);
             ft.play();
@@ -326,20 +401,46 @@ public class PatientsController {
 
     @FXML
     public void confirmAddPatient() {
-        String name = addPatientName.getText();
-        int age = Integer.parseInt(addPatientAge.getText());
-        String gender = addPatientGender.getValue();
-        String diagnosis = addPatientDiagnosis.getText();
-        String severity = addPatientSeverity.getValue();
+        // Validation
+        if (addPatientName.getText().isEmpty() ||
+                addPatientAge.getText().isEmpty() ||
+                addPatientGender.getValue() == null ||
+                addPatientSeverity.getValue() == null) {
 
-        patientDAO.addPatientAutoAssign(
-                name, age, gender, diagnosis, severity
-        );
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Missing Information");
+            alert.setHeaderText("Cannot Add Patient");
+            alert.setContentText("Please fill in all required fields.");
+            alert.showAndWait();
+            return;
+        }
 
-        hideAddPatientPopup();
-        loadPatients();
+        try {
+            String name = addPatientName.getText();
+            int age = Integer.parseInt(addPatientAge.getText());
+            String gender = addPatientGender.getValue();
+            String diagnosis = addPatientDiagnosis.getText();
+            String severity = addPatientSeverity.getValue();
+
+            patientDAO.addPatientAutoAssign(name, age, gender, diagnosis, severity);
+
+            Alert success = new Alert(Alert.AlertType.INFORMATION);
+            success.setTitle("Success");
+            success.setHeaderText("Patient Added");
+            success.setContentText("Patient has been successfully admitted.");
+            success.showAndWait();
+
+            hideAddPatientPopup();
+            loadPatients();
+
+        } catch (NumberFormatException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Invalid Input");
+            alert.setHeaderText("Invalid Age");
+            alert.setContentText("Please enter a valid age number.");
+            alert.showAndWait();
+        }
     }
-
 
     private void clearAddPatientForm() {
         if (addPatientName != null) addPatientName.clear();
@@ -349,4 +450,10 @@ public class PatientsController {
         if (addPatientSeverity != null) addPatientSeverity.setValue(null);
     }
 
+    // ================= HELPER =================
+
+    private String capitalize(String s) {
+        return s == null || s.isEmpty() ? "" :
+                s.substring(0, 1).toUpperCase() + s.substring(1);
+    }
 }

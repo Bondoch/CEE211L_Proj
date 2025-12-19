@@ -6,6 +6,7 @@ module com.example.triage {
     requires java.prefs;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome5;
+    requires java.desktop;
     opens com.example.triage to javafx.fxml;
     opens com.example.triage.controllers to javafx.fxml;
 

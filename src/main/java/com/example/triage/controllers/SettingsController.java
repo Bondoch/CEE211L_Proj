@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.util.prefs.Preferences;
 import com.example.triage.database.DBConnection;
+import com.example.triage.services.CapacityMonitor; // ✅ ADD THIS IMPORT
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -319,7 +320,7 @@ public class SettingsController {
         prefs.put("passwordLength", passwordLengthCombo.getValue());
         prefs.putBoolean("twoFactor", twoFactorCheck.isSelected());
 
-        // Capacity Warning Settings
+        // ✅ CAPACITY WARNING SETTINGS WITH MONITORING RESTART
         if (warningThresholdSlider != null) {
             prefs.putDouble("warningThreshold", warningThresholdSlider.getValue());
         }
@@ -327,7 +328,19 @@ public class SettingsController {
             prefs.putDouble("criticalThreshold", criticalThresholdSlider.getValue());
         }
         if (enableCapacityWarningsCheck != null) {
-            prefs.putBoolean("enableCapacityWarnings", enableCapacityWarningsCheck.isSelected());
+            boolean enabled = enableCapacityWarningsCheck.isSelected();
+            prefs.putBoolean("enableCapacityWarnings", enabled);
+
+            // ✅ RESTART MONITORING WITH NEW SETTINGS
+            CapacityMonitor monitor = CapacityMonitor.getInstance();
+            monitor.stopMonitoring();
+
+            if (enabled) {
+                monitor.startMonitoring();
+                System.out.println("✅ Capacity monitoring restarted with new settings");
+            } else {
+                System.out.println("⏹️ Capacity monitoring disabled");
+            }
         }
         if (soundAlertCheck != null) {
             prefs.putBoolean("soundAlert", soundAlertCheck.isSelected());
