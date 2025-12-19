@@ -1,5 +1,6 @@
 package com.example.triage.controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
@@ -32,16 +33,25 @@ public class FacilitiesController {
     @FXML private TextField addFacilityName;
     @FXML private ComboBox<String> addFacilityType;
     @FXML private Spinner<Integer> addFacilityFloors;
+    @FXML private Spinner<Integer> addFacilityBeds;
+    @FXML private Spinner<Integer> addFacilityRooms;
+    @FXML
+    private StackPane addFacilityOverlay;
+
+
 
     /* REMOVE FACILITY */
     @FXML private VBox removeFacilityPanel;
     @FXML private ComboBox<String> removeFacilitySelector;
     @FXML private ComboBox<Integer> removeFloorSelector;
 
+
+
     /* ================================
        STATE
        ================================ */
     private boolean editMode = false;
+
 
     /* ================================
        INITIALIZATION
@@ -49,11 +59,23 @@ public class FacilitiesController {
     @FXML
     public void initialize() {
         setupEditMode();
-        setupAddRemovePanels();
         loadFacilities();
         setupSelectors();
         clearView();
+        addFacilityType.getItems().setAll("ER", "WARD", "ICU", "PACU");
+        addFacilityFloors.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 50, 1)
+        );
+
+        addFacilityBeds.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 0)
+        );
+
+        addFacilityRooms.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 0)
+        );
     }
+
 
     /* ================================
        FACILITY / FLOOR LOADING
@@ -241,31 +263,33 @@ public class FacilitiesController {
         editFacilityPanel.setVisible(false);
         editFacilityPanel.setManaged(false);
     }
+    @FXML
+    private void closeAddFacilityPopup() {
+        addFacilityOverlay.setVisible(false);
+        addFacilityOverlay.setManaged(false);
+
+        // reset fields
+        addFacilityName.clear();
+        addFacilityType.setValue(null);
+        addFacilityFloors.getValueFactory().setValue(1);
+        addFacilityBeds.getValueFactory().setValue(0);
+        addFacilityRooms.getValueFactory().setValue(0);
+    }
+
+
 
     /* ================================
        ADD / REMOVE FACILITY
        ================================ */
-    private void setupAddRemovePanels() {
-        addFacilityPanel.setVisible(false);
-        addFacilityPanel.setManaged(false);
-
-        removeFacilityPanel.setVisible(false);
-        removeFacilityPanel.setManaged(false);
-
-        // UPDATED TYPES
-        addFacilityType.getItems().addAll("ER", "WARD", "ICU", "OR");
-
-        addFacilityFloors.setValueFactory(
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 50, 1)
-        );
-    }
 
     @FXML
     private void handleAddFacility() {
-        addFacilityPanel.setVisible(true);
-        addFacilityPanel.setManaged(true);
+        addFacilityOverlay.setVisible(true);
+        addFacilityOverlay.setManaged(true);
         removeFacilityPanel.setVisible(false);
         removeFacilityPanel.setManaged(false);
+        Platform.runLater(() -> addFacilityName.requestFocus());
+
     }
 
     @FXML
@@ -274,32 +298,23 @@ public class FacilitiesController {
         String name = addFacilityName.getText();
         String type = addFacilityType.getValue();
         int floors = addFacilityFloors.getValue();
+        int bedCount = addFacilityBeds.getValue();
+        int roomCount = addFacilityRooms.getValue();
 
         if (name == null || name.isBlank() || type == null) return;
 
-        int bedCount = 0;
-        int roomCount = 0;
-
-        System.out.println("Creating facility type: " + type);
-
-        switch (type) {
-            case "ER" -> bedCount = 10;
-            case "WARD", "ICU" -> {
-                bedCount = 10;
-                roomCount = 4;
-            }
-            case "OR" -> roomCount = 4;
-        }
-
         try (Connection conn = DBConnection.getConnection()) {
 
-            PreparedStatement facPS =
-                    conn.prepareStatement(
-                            "INSERT INTO facilities (name, type) VALUES (?, ?)",
-                            Statement.RETURN_GENERATED_KEYS);
+            // 1️⃣ Insert facility
+            PreparedStatement facPS = conn.prepareStatement(
+                    "INSERT INTO facilities (name, type, bed_count, room_count) VALUES (?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS
+            );
 
             facPS.setString(1, name);
             facPS.setString(2, type);
+            facPS.setInt(3, bedCount);
+            facPS.setInt(4, roomCount);
             facPS.executeUpdate();
 
             ResultSet facKeys = facPS.getGeneratedKeys();
@@ -307,12 +322,13 @@ public class FacilitiesController {
 
             int facilityId = facKeys.getInt(1);
 
+            // 2️⃣ Floors
             for (int floor = 1; floor <= floors; floor++) {
 
-                PreparedStatement floorPS =
-                        conn.prepareStatement(
-                                "INSERT INTO floors (facility_id, floor_number) VALUES (?, ?)",
-                                Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement floorPS = conn.prepareStatement(
+                        "INSERT INTO floors (facility_id, floor_number) VALUES (?, ?)",
+                        Statement.RETURN_GENERATED_KEYS
+                );
 
                 floorPS.setInt(1, facilityId);
                 floorPS.setInt(2, floor);
@@ -323,19 +339,26 @@ public class FacilitiesController {
 
                 int floorId = floorKeys.getInt(1);
 
-                for (int b = 1; b <= bedCount; b++) {
-                    conn.prepareStatement(
-                                    "INSERT INTO units (floor_id, label, status) VALUES (" +
-                                            floorId + ", 'Bed " + b + "', 'AVAILABLE')")
-                            .executeUpdate();
+                // Beds (ER, WARD, ICU, PACU)
+                if (List.of("ER", "WARD", "ICU", "PACU").contains(type)) {
+                    for (int b = 1; b <= bedCount; b++) {
+                        conn.prepareStatement(
+                                "INSERT INTO units (floor_id, label, status) VALUES (" +
+                                        floorId + ", 'Bed " + b + "', 'AVAILABLE')"
+                        ).executeUpdate();
+                    }
                 }
 
-                for (int r = 1; r <= roomCount; r++) {
-                    conn.prepareStatement(
-                                    "INSERT INTO units (floor_id, label, status) VALUES (" +
-                                            floorId + ", 'Room " + r + "', 'AVAILABLE')")
-                            .executeUpdate();
+// Rooms (WARD ONLY)
+                if ("WARD".equals(type)) {
+                    for (int r = 1; r <= roomCount; r++) {
+                        conn.prepareStatement(
+                                "INSERT INTO units (floor_id, label, status) VALUES (" +
+                                        floorId + ", 'Room " + r + "', 'AVAILABLE')"
+                        ).executeUpdate();
+                    }
                 }
+
             }
 
         } catch (SQLException e) {
@@ -343,17 +366,14 @@ public class FacilitiesController {
         }
 
         loadFacilities();
-        addFacilityPanel.setVisible(false);
-        addFacilityPanel.setManaged(false);
+        closeAddFacilityPopup(); // whatever method you use
     }
+
 
     @FXML
     private void handleRemoveFacility() {
         removeFacilityPanel.setVisible(true);
         removeFacilityPanel.setManaged(true);
-        addFacilityPanel.setVisible(false);
-        addFacilityPanel.setManaged(false);
-
         removeFacilitySelector.getItems().setAll(facilitySelector.getItems());
     }
 
@@ -394,4 +414,5 @@ public class FacilitiesController {
         availableCount.setText("0");
         occupiedCount.setText("0");
     }
+
 }
