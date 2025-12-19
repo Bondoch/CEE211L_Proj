@@ -50,23 +50,29 @@ public class StaffAccountsController {
 
     /* ================= INIT ================= */
     public void initialize() {
+        System.out.println("📋 StaffAccountsController initialized");
 
         editStaffBtn.setDisable(true);
 
         addRoleBox.getItems().addAll("Doctor", "Nurse", "Technician", "Staff");
         editRoleBox.getItems().addAll(addRoleBox.getItems());
 
-        addFacilityBox.getItems().setAll(facilityDAO.getAllFacilities());
-        editFacilityBox.getItems().setAll(facilityDAO.getAllFacilities());
+        // Load facilities
+        List<String> facilities = facilityDAO.getAllFacilities();
+        System.out.println("🏥 Loaded " + facilities.size() + " facilities: " + facilities);
+
+        addFacilityBox.getItems().setAll(facilities);
+        editFacilityBox.getItems().setAll(facilities);
 
         addFacilityBox.setOnAction(e -> {
             String facility = addFacilityBox.getValue();
             if (facility == null) return;
 
             int facilityId = facilityDAO.getFacilityIdByName(facility);
-            addFloorBox.getItems().setAll(
-                    floorDAO.getFloorsByFacility(facilityId)
-            );
+            List<String> floors = floorDAO.getFloorsByFacility(facilityId);
+            System.out.println("🏢 Loaded " + floors.size() + " floors for " + facility);
+
+            addFloorBox.getItems().setAll(floors);
         });
 
         editFacilityBox.setOnAction(e -> {
@@ -80,25 +86,25 @@ public class StaffAccountsController {
         });
 
         hideAllPopups();
-        loadStaffFromDatabase(); // ✅ IMPORTANT
+        loadStaffFromDatabase();
     }
 
     /* ================= DB LOAD ================= */
     private void loadStaffFromDatabase() {
+        System.out.println("🔄 Loading staff from database...");
         staffList.clear();
         staffList.addAll(staffDAO.getAllStaff());
+        System.out.println("✅ Loaded " + staffList.size() + " staff members");
         refreshTable();
     }
 
     /* ================= TABLE ================= */
     private void refreshTable() {
-
         staffRows.getChildren().clear();
         rowSelectors.clear();
         onShiftContainer.getChildren().clear();
 
         for (Staff staff : staffList) {
-
             CheckBox cb = new CheckBox();
             rowSelectors.add(cb);
             cb.selectedProperty().addListener((o, a, b) -> updateEditButton());
@@ -114,7 +120,6 @@ public class StaffAccountsController {
     }
 
     private GridPane createStaffRow(Staff staff, CheckBox cb) {
-
         GridPane row = new GridPane();
         row.setPrefWidth(Double.MAX_VALUE);
 
@@ -179,6 +184,7 @@ public class StaffAccountsController {
 
     /* ================= POPUPS ================= */
     private void showPopup(VBox popup) {
+        System.out.println("📤 Showing popup: " + popup.getId());
 
         staffBackdrop.setVisible(true);
         staffBackdrop.setManaged(true);
@@ -199,6 +205,7 @@ public class StaffAccountsController {
 
     @FXML
     private void hideAllPopups() {
+        System.out.println("📥 Hiding all popups");
 
         staffBackdrop.setVisible(false);
         staffBackdrop.setManaged(false);
@@ -218,52 +225,106 @@ public class StaffAccountsController {
     /* ================= ADD ================= */
     @FXML
     private void showAddStaffPopup() {
+        System.out.println("➕ Add Staff button clicked");
         showPopup(addStaffPopup);
     }
 
     @FXML
     private void confirmAddStaff() {
+        System.out.println("💾 Confirm Add Staff clicked");
 
         String name = addNameField.getText();
         String role = addRoleBox.getValue();
         String facility = addFacilityBox.getValue();
         String floor = addFloorBox.getValue();
 
+        System.out.println("📝 Input Values:");
+        System.out.println("  Name: " + name);
+        System.out.println("  Role: " + role);
+        System.out.println("  Facility: " + facility);
+        System.out.println("  Floor: " + floor);
+
         // ✅ Guard clause FIRST
         if (name == null || name.isBlank()
                 || role == null
                 || facility == null
                 || floor == null) {
+            System.err.println("❌ Validation failed - missing fields!");
+
+            // Show error alert
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Missing Information");
+            alert.setHeaderText("Cannot Add Staff");
+            alert.setContentText("Please fill in all fields:\n" +
+                    "- Name: " + (name == null || name.isBlank() ? "❌ Missing" : "✅") + "\n" +
+                    "- Role: " + (role == null ? "❌ Missing" : "✅") + "\n" +
+                    "- Facility: " + (facility == null ? "❌ Missing" : "✅") + "\n" +
+                    "- Floor: " + (floor == null ? "❌ Missing" : "✅"));
+            alert.showAndWait();
             return;
         }
 
-        int facilityId = facilityDAO.getFacilityIdByName(facility);
-        int floorNumber = Integer.parseInt(floor.replace("Floor ", ""));
-        int floorId = floorDAO.getFloorId(facilityId, floorNumber);
+        try {
+            int facilityId = facilityDAO.getFacilityIdByName(facility);
+            int floorNumber = Integer.parseInt(floor.replace("Floor ", ""));
+            int floorId = floorDAO.getFloorId(facilityId, floorNumber);
 
-        // ✅ Debug prints (NOW valid)
-        System.out.println("Facility ID = " + facilityId);
-        System.out.println("Floor ID = " + floorId);
+            System.out.println("🔍 Database IDs:");
+            System.out.println("  Facility ID: " + facilityId);
+            System.out.println("  Floor Number: " + floorNumber);
+            System.out.println("  Floor ID: " + floorId);
 
-        // === INSERT STAFF ===
-        staffDAO.addStaff(name, role, facilityId, floorId);
+            // === INSERT STAFF ===
+            System.out.println("📥 Inserting staff into database...");
+            staffDAO.addStaff(name, role, facilityId, floorId);
+            System.out.println("✅ Staff inserted successfully");
 
-        // === CREATE USER ACCOUNT ===
-        String[] parts = name.trim().split("\\s+");
-        String baseUsername = parts[parts.length - 1].toLowerCase();
-        String username = baseUsername + (System.currentTimeMillis() % 10000);
+            // === CREATE USER ACCOUNT ===
+            String[] parts = name.trim().split("\\s+");
+            String baseUsername = parts[parts.length - 1].toLowerCase();
+            String username = baseUsername + (System.currentTimeMillis() % 10000);
+            String password = role.toLowerCase() + "123";
+            String userRole = role.equalsIgnoreCase("Doctor") ? "admin" : "user";
 
-        String password = role.toLowerCase() + "123";
-        String userRole = role.equalsIgnoreCase("Doctor") ? "admin" : "user";
+            System.out.println("👤 Creating user account:");
+            System.out.println("  Username: " + username);
+            System.out.println("  Password: " + password);
+            System.out.println("  Role: " + userRole);
 
-        userDAO.createUser(username, password, userRole);
+            userDAO.createUser(username, password, userRole);
+            System.out.println("✅ User account created successfully");
 
-        // === RELOAD FROM DATABASE (single source of truth) ===
-        loadStaffFromDatabase();
-        hideAllPopups();
+            // === SUCCESS ALERT ===
+            Alert success = new Alert(Alert.AlertType.INFORMATION);
+            success.setTitle("Success");
+            success.setHeaderText("Staff Added Successfully");
+            success.setContentText("Staff member: " + name + "\n" +
+                    "Username: " + username + "\n" +
+                    "Password: " + password + "\n" +
+                    "Role: " + userRole);
+            success.showAndWait();
+
+            // === RELOAD FROM DATABASE ===
+            loadStaffFromDatabase();
+            hideAllPopups();
+
+            // Clear form
+            addNameField.clear();
+            addRoleBox.setValue(null);
+            addFacilityBox.setValue(null);
+            addFloorBox.setValue(null);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error adding staff:");
+            e.printStackTrace();
+
+            Alert error = new Alert(Alert.AlertType.ERROR);
+            error.setTitle("Error");
+            error.setHeaderText("Failed to Add Staff");
+            error.setContentText("Error: " + e.getMessage());
+            error.showAndWait();
+        }
     }
-
-
 
     /* ================= EDIT ================= */
     @FXML
@@ -285,7 +346,6 @@ public class StaffAccountsController {
 
     @FXML
     private void confirmEditStaff() {
-
         int index = selectedIndex();
         if (index == -1) return;
 
@@ -310,7 +370,6 @@ public class StaffAccountsController {
 
     @FXML
     private void confirmDeleteStaff() {
-
         for (int i = rowSelectors.size() - 1; i >= 0; i--) {
             if (rowSelectors.get(i).isSelected()) {
                 staffDAO.deleteStaff(staffList.get(i).getId());
