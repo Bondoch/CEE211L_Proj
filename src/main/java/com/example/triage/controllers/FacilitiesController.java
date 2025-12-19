@@ -44,6 +44,19 @@ public class FacilitiesController {
     @FXML private VBox removeFacilityPanel;
     @FXML private ComboBox<String> removeFacilitySelector;
     @FXML private ComboBox<Integer> removeFloorSelector;
+    @FXML private StackPane removeFacilityOverlay;
+    @FXML private Spinner<Integer> removeBedsSpinner;
+    @FXML private Spinner<Integer> removeRoomsSpinner;
+    @FXML private StackPane deleteConfirmOverlay;
+    @FXML private StackPane deleteBlockedOverlay;
+
+    @FXML private Label deleteConfirmMessage;
+    @FXML private Label deleteBlockedMessage;
+    @FXML private VBox removeFacilityPopup;
+
+
+
+
 
 
 
@@ -51,6 +64,11 @@ public class FacilitiesController {
        STATE
        ================================ */
     private boolean editMode = false;
+    private String pendingFacility;
+    private Integer pendingFloor;
+    private int pendingBeds;
+    private int pendingRooms;
+
 
 
     /* ================================
@@ -62,6 +80,8 @@ public class FacilitiesController {
         loadFacilities();
         setupSelectors();
         clearView();
+        setupRemoveListeners();
+
         addFacilityType.getItems().setAll("ER", "WARD", "ICU", "PACU");
         addFacilityFloors.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 50, 1)
@@ -372,37 +392,182 @@ public class FacilitiesController {
 
     @FXML
     private void handleRemoveFacility() {
-        removeFacilityPanel.setVisible(true);
-        removeFacilityPanel.setManaged(true);
+        removeFacilityOverlay.setVisible(true);
+        removeFacilityOverlay.setManaged(true);
+
         removeFacilitySelector.getItems().setAll(facilitySelector.getItems());
+        removeFacilitySelector.setValue(null);
+        removeFloorSelector.getItems().clear();
+
+        removeBedsSpinner.setDisable(true);
+        removeRoomsSpinner.setDisable(true);
+        removeBedsSpinner.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 0, 0)
+        );
+        removeRoomsSpinner.setValueFactory(
+                new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 0, 0)
+        );
+
+    }
+    private void setupRemoveListeners() {
+
+        removeFacilitySelector.setOnAction(e -> {
+            String facility = removeFacilitySelector.getValue();
+            removeFloorSelector.getItems().clear();
+
+            if (facility == null) return;
+
+            try (Connection conn = DBConnection.getConnection();
+                 PreparedStatement ps = conn.prepareStatement("""
+                 SELECT floor_number
+                 FROM floors f
+                 JOIN facilities fac ON fac.id=f.facility_id
+                 WHERE fac.name=?
+                 ORDER BY floor_number
+             """)) {
+
+                ps.setString(1, facility);
+                ResultSet rs = ps.executeQuery();
+
+                while (rs.next()) {
+                    removeFloorSelector.getItems().add(rs.getInt("floor_number"));
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        removeFloorSelector.setOnAction(e -> {
+            String facility = removeFacilitySelector.getValue();
+            Integer floor = removeFloorSelector.getValue();
+            if (facility == null || floor == null) return;
+
+            int beds = countUnits(facility, floor, "Bed");
+            int rooms = countUnits(facility, floor, "Room");
+
+            removeBedsSpinner.setValueFactory(
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(0, beds, 0)
+            );
+            removeRoomsSpinner.setValueFactory(
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(0, rooms, 0)
+            );
+
+            removeBedsSpinner.setDisable(beds == 0);
+            removeRoomsSpinner.setDisable(rooms == 0);
+        });
     }
 
     @FXML
-    private void confirmRemoveFacility() {
-        String facility = removeFacilitySelector.getValue();
-        Integer floor = removeFloorSelector.getValue();
-        if (facility == null) return;
+    private void executeConfirmedDelete() {
 
         try (Connection conn = DBConnection.getConnection()) {
-            if (floor == null) {
-                conn.prepareStatement(
-                        "DELETE FROM facilities WHERE name='" + facility + "'").executeUpdate();
-            } else {
-                conn.prepareStatement("""
-                        DELETE f FROM floors f
-                        JOIN facilities fac ON fac.id=f.facility_id
-                        WHERE fac.name='""" + facility + "' AND f.floor_number=" + floor)
-                        .executeUpdate();
+
+            PreparedStatement facPS =
+                    conn.prepareStatement("SELECT id FROM facilities WHERE name=?");
+            facPS.setString(1, pendingFacility);
+            ResultSet rs = facPS.executeQuery();
+            if (!rs.next()) return;
+
+            int facilityId = rs.getInt("id");
+
+            // 🚫 BLOCK IF OCCUPIED
+            if (hasOccupiedUnits(conn, facilityId, pendingFloor)) {
+                showDeleteBlocked();
+                return;
             }
+
+            // 🔥 DELETE LOGIC
+            if (pendingFloor == null) {
+                conn.prepareStatement(
+                        "DELETE FROM facilities WHERE id=" + facilityId
+                ).executeUpdate();
+            } else if (pendingBeds == 0 && pendingRooms == 0) {
+
+                PreparedStatement ps = conn.prepareStatement("""
+                DELETE f FROM floors f
+                WHERE f.facility_id=? AND f.floor_number=?
+            """);
+                ps.setInt(1, facilityId);
+                ps.setInt(2, pendingFloor);
+                ps.executeUpdate();
+
+            } else {
+                int floorId = getFloorId(conn, pendingFacility, pendingFloor);
+
+                if (pendingBeds > 0) {
+                    deleteUnits(conn, floorId, "Bed", pendingBeds);
+                }
+                if (pendingRooms > 0) {
+                    deleteUnits(conn, floorId, "Room", pendingRooms);
+                }
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         loadFacilities();
         clearView();
-        removeFacilityPanel.setVisible(false);
-        removeFacilityPanel.setManaged(false);
+        closeAllDeletePopups();
     }
+
+    private boolean hasOccupiedUnits(Connection conn, int facilityId, Integer floor) throws SQLException {
+
+        String sql = """
+        SELECT COUNT(*) 
+        FROM units u
+        JOIN floors f ON f.id = u.floor_id
+        WHERE f.facility_id = ?
+        AND u.status = 'OCCUPIED'
+    """ + (floor != null ? " AND f.floor_number = ?" : "");
+
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, facilityId);
+
+        if (floor != null) {
+            ps.setInt(2, floor);
+        }
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        return rs.getInt(1) > 0;
+    }
+
+
+
+
+
+
+    @FXML
+    private void confirmRemoveFacility() {
+
+        pendingFacility = removeFacilitySelector.getValue();
+        pendingFloor = removeFloorSelector.getValue();
+
+        Integer bedsVal = removeBedsSpinner.getValue();
+        Integer roomsVal = removeRoomsSpinner.getValue();
+
+        pendingBeds = bedsVal == null ? 0 : bedsVal;
+        pendingRooms = roomsVal == null ? 0 : roomsVal;
+
+        if (pendingFacility == null) return;
+
+        deleteConfirmMessage.setText(
+                buildDeleteMessage(
+                        pendingFacility,
+                        pendingFloor,
+                        pendingBeds,
+                        pendingRooms
+                )
+        );
+
+        showDeleteConfirm();
+    }
+
+
+
+
+
 
     /* ================================
        HELPERS
@@ -414,5 +579,118 @@ public class FacilitiesController {
         availableCount.setText("0");
         occupiedCount.setText("0");
     }
+    private int countUnits(String facility, int floor, String type) {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement("""
+             SELECT COUNT(*)
+             FROM units u
+             JOIN floors f ON f.id=u.floor_id
+             JOIN facilities fac ON fac.id=f.facility_id
+             WHERE fac.name=? AND f.floor_number=? AND u.label LIKE ?
+         """)) {
+
+            ps.setString(1, facility);
+            ps.setInt(2, floor);
+            ps.setString(3, type + " %");
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            return 0;
+        }
+    }
+
+    private int getFloorId(Connection conn, String facility, int floor) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("""
+        SELECT f.id
+        FROM floors f
+        JOIN facilities fac ON fac.id=f.facility_id
+        WHERE fac.name=? AND f.floor_number=?
+    """);
+        ps.setString(1, facility);
+        ps.setInt(2, floor);
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        return rs.getInt(1);
+    }
+
+    private void deleteUnits(Connection conn, int floorId, String type, int limit) throws SQLException {
+        PreparedStatement ps = conn.prepareStatement("""
+        DELETE FROM units
+        WHERE floor_id=? AND label LIKE ?
+        ORDER BY CAST(SUBSTRING(label, LOCATE(' ', label)+1) AS UNSIGNED) DESC
+        LIMIT ?
+    """);
+        ps.setInt(1, floorId);
+        ps.setString(2, type + " %");
+        ps.setInt(3, limit);
+        ps.executeUpdate();
+    }
+    @FXML
+    private void closeRemoveFacilityPopup() {
+        removeFacilityOverlay.setVisible(false);
+        removeFacilityOverlay.setManaged(false);
+    }
+    private void showDeleteConfirm() {
+        deleteConfirmOverlay.setVisible(true);
+        deleteConfirmOverlay.setManaged(true);
+    }
+
+    private void showDeleteBlocked() {
+        deleteBlockedOverlay.setVisible(true);
+        deleteBlockedOverlay.setManaged(true);
+    }
+
+    @FXML
+    private void closeDeleteConfirm() {
+        deleteConfirmOverlay.setVisible(false);
+        deleteConfirmOverlay.setManaged(false);
+    }
+
+    @FXML
+    private void closeDeleteBlocked() {
+        deleteBlockedOverlay.setVisible(false);
+        deleteBlockedOverlay.setManaged(false);
+    }
+
+    private void closeAllDeletePopups() {
+        closeDeleteConfirm();
+        closeDeleteBlocked();
+        closeRemoveFacilityPopup();
+    }
+
+    private String buildDeleteMessage(
+            String facility,
+            Integer floor,
+            Integer beds,
+            Integer rooms
+    ) {
+        StringBuilder msg = new StringBuilder("You are about to delete:\n\n");
+
+        msg.append("Facility: ").append(facility).append("\n");
+
+        if (floor != null) {
+            msg.append("Floor: ").append(floor).append("\n");
+        } else {
+            msg.append("All floors\n");
+        }
+
+        if (beds != null && beds > 0) {
+            msg.append("Beds: ").append(beds).append("\n");
+        }
+
+        if (rooms != null && rooms > 0) {
+            msg.append("Rooms: ").append(rooms).append("\n");
+        }
+
+        msg.append("\nThis action cannot be undone.");
+
+        return msg.toString();
+    }
+
+
+
+
+
 
 }
