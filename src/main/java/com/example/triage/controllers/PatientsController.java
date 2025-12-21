@@ -171,7 +171,9 @@ public class PatientsController {
         );
 
         detailBackdrop.setVisible(true);
+        detailBackdrop.setManaged(true);
         patientDetailCard.setVisible(true);
+        patientDetailCard.setManaged(true);
     }
 
     // ===== EDIT =====
@@ -203,7 +205,9 @@ public class PatientsController {
         }
 
         editBackdrop.setVisible(true);
+        editBackdrop.setManaged(true);
         editPatientPopup.setVisible(true);
+        editPatientPopup.setManaged(true);
     }
 
     @FXML
@@ -227,13 +231,12 @@ public class PatientsController {
 
     @FXML
     public void cancelEdit() {
-        editBackdrop.setVisible(false);
-        editBackdrop.setManaged(false);
         editPatientPopup.setVisible(false);
         editPatientPopup.setManaged(false);
+        editBackdrop.setVisible(false);
+        editBackdrop.setManaged(false);
     }
 
-    @FXML
     public void handleCloseDetail() {
         patientDetailCard.setVisible(false);
         patientDetailCard.setManaged(false);
