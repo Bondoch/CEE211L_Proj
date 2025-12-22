@@ -1,5 +1,6 @@
 package com.example.triage.controllers;
 
+import com.example.triage.services.PermissionService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -72,6 +73,7 @@ public class PatientsController {
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("MMM dd, yyyy - hh:mm a");
 
+
     @FXML
     public void initialize() {
 
@@ -106,6 +108,20 @@ public class PatientsController {
                     : SortMode.NONE;
             loadPatientsUnified();
         });
+
+        // ===== ADD PATIENT POPUP COMBOS =====
+        addPatientGender.getItems().setAll(
+                "Male",
+                "Female",
+                "Other"
+        );
+
+        addPatientSeverity.getItems().setAll(
+                "Moderate",
+                "High",
+                "Critical"
+        );
+
     }
 
     private void loadPatientsUnified() {
@@ -181,6 +197,13 @@ public class PatientsController {
     @FXML
     public void handleEditPatient() {
 
+
+        if (!PermissionService.canEditSeverity()) {
+            showPermissionDenied("You are not allowed to edit patient details.");
+            return;
+        }
+
+
         editDiagnosis.setText(
                 patientDAO.getDiagnosisByPatientId(selectedPatientId)
         );
@@ -212,6 +235,31 @@ public class PatientsController {
 
     @FXML
     public void confirmEdit() {
+
+        String fromType =
+                facilityDAO.getFacilityTypeByUnitId(selectedUnitId);
+
+        String toType = fromType;
+
+// Only check destination if a transfer is happening
+        if (!editUnit.isDisabled() && editUnit.getValue() != null) {
+            toType =
+                    facilityDAO.getFacilityTypeByUnitId(
+                            patientDAO.getUnitIdByLabel(editUnit.getValue())
+                    );
+        }
+
+        if (!PermissionService.canTransfer(fromType, toType)) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Transfer Restricted");
+            alert.setHeaderText("Action Not Allowed");
+            alert.setContentText(
+                    "You are only allowed to transfer patients between inpatient wards."
+            );
+            alert.showAndWait();
+            return;
+        }
+
 
         patientDAO.updatePatientEdit(
                 selectedPatientId,
@@ -246,6 +294,13 @@ public class PatientsController {
 
     @FXML
     public void handleDischargePatient() {
+
+        if (!PermissionService.canDischargePatient()) {
+            showPermissionDenied("You are not allowed to discharge patients.");
+            return;
+        }
+
+
         dischargeBackdrop.setVisible(true);
         dischargeBackdrop.setManaged(true);
         dischargePopup.setVisible(true);
@@ -270,6 +325,12 @@ public class PatientsController {
 
     @FXML
     public void showAddPatientPopup() {
+
+        if (!PermissionService.canAddPatient()) {
+            showPermissionDenied("You are not allowed to add patients.");
+            return;
+        }
+
         addPatientBackdrop.setVisible(true);
         addPatientBackdrop.setManaged(true);
         addPatientPopup.setVisible(true);
@@ -286,6 +347,20 @@ public class PatientsController {
 
     @FXML
     public void confirmAddPatient() {
+
+        if (addPatientName.getText().isBlank()
+                || addPatientAge.getText().isBlank()
+                || addPatientGender.getValue() == null
+                || addPatientSeverity.getValue() == null) {
+
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Incomplete Form");
+            alert.setHeaderText("Missing Information");
+            alert.setContentText("Please fill in all required fields.");
+            alert.showAndWait();
+            return;
+        }
+
         patientDAO.addPatientAutoAssign(
                 addPatientName.getText(),
                 Integer.parseInt(addPatientAge.getText()),
@@ -297,5 +372,15 @@ public class PatientsController {
         hideAddPatientPopup();
         loadPatientsUnified();
     }
+
+
+    private void showPermissionDenied(String message) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Permission Denied");
+        alert.setHeaderText("Action Not Allowed");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
 
 }

@@ -283,6 +283,50 @@
                 </HBox>
             </VBox>
 
+            <!-- ================= PERMISSION / INFO POPUP ================= -->
+            <VBox fx:id="staffInfoPopup"
+                  visible="false"
+                  managed="false"
+                  spacing="16"
+                  prefWidth="360"
+                  prefHeight="200"
+
+                  minWidth="360"
+                  minHeight="200"
+
+                  maxWidth="360"
+                  maxHeight="200"
+                  style="-fx-background-color: white;
+       -fx-background-radius: 18;
+       -fx-padding: 25;
+       -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0, 0, 5);"
+                  StackPane.alignment="CENTER">
+
+                <Label fx:id="staffInfoTitle"
+                       style="-fx-font-size:16px;
+                  -fx-font-weight:bold;
+                  -fx-text-fill:#034c81;" />
+
+                <Label fx:id="staffInfoMessage"
+                       wrapText="true"
+                       textAlignment="CENTER"
+                       style="-fx-font-size:12px;
+                  -fx-text-fill:#7f858c;" />
+
+                <HBox alignment="CENTER_RIGHT">
+                    <Button text="OK"
+                            style="
+          -fx-background-color: #f8f9fa;
+          -fx-border-color: #e0e0e0;
+          -fx-border-radius: 20;
+          -fx-background-radius: 20;
+          -fx-padding: 6 18;
+          -fx-cursor: hand;"
+                    onAction="#hideAllPopups"/>
+                </HBox>
+            </VBox>
+
+
 
         </StackPane>
     </center>

@@ -1,6 +1,7 @@
 package com.example.triage.controllers;
 
 import com.example.triage.database.*;
+import com.example.triage.services.PermissionService;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -39,6 +40,11 @@ public class StaffAccountsController {
     @FXML private ComboBox<String> editFacilityBox;
     @FXML private ComboBox<String> editFloorBox;
 
+    @FXML private VBox staffInfoPopup;
+    @FXML private Label staffInfoTitle;
+    @FXML private Label staffInfoMessage;
+
+
     /* ================= STATE ================= */
     private final List<Staff> staffList = new ArrayList<>();
     private final List<CheckBox> rowSelectors = new ArrayList<>();
@@ -50,11 +56,18 @@ public class StaffAccountsController {
 
     /* ================= INIT ================= */
     public void initialize() {
+
+        boolean canManage = PermissionService.canManageStaff();
+
+        editStaffBtn.setDisable(!canManage);
+
+
+        // 🚨 DO NOT RETURN
+        loadStaffFromDatabase();
+
         System.out.println("📋 StaffAccountsController initialized");
 
-        editStaffBtn.setDisable(true);
-
-        addRoleBox.getItems().addAll("Doctor", "Nurse", "Technician", "Staff");
+        addRoleBox.getItems().addAll("Doctor", "Nurse", "Technician");
         editRoleBox.getItems().addAll(addRoleBox.getItems());
 
         // Load facilities
@@ -219,18 +232,33 @@ public class StaffAccountsController {
         deleteConfirmPopup.setVisible(false);
         deleteConfirmPopup.setManaged(false);
 
+        staffInfoPopup.setVisible(false);
+        staffInfoPopup.setManaged(false);
+
         staffStack.setOnMouseClicked(null);
     }
 
     /* ================= ADD ================= */
     @FXML
     private void showAddStaffPopup() {
+
+        if (!PermissionService.canManageStaff()) {
+            showPermissionDenied("Only administrators can add staff.");
+            return;
+        }
+
         System.out.println("➕ Add Staff button clicked");
         showPopup(addStaffPopup);
     }
 
     @FXML
     private void confirmAddStaff() {
+
+        if (!PermissionService.canManageStaff()) {
+            showPermissionDenied("Only administrators can manage staff.");
+            return;
+        }
+
         System.out.println("💾 Confirm Add Staff clicked");
 
         String name = addNameField.getText();
@@ -276,22 +304,30 @@ public class StaffAccountsController {
 
             // === INSERT STAFF ===
             System.out.println("📥 Inserting staff into database...");
-            staffDAO.addStaff(name, role, facilityId, floorId);
+            int staffId = staffDAO.addStaff(name, role, facilityId, floorId);
+            System.out.println("🧪 DEBUG staffId before user insert = " + staffId);
+            if (staffId == -1) {
+                throw new RuntimeException("Staff insertion failed");
+            }
             System.out.println("✅ Staff inserted successfully");
 
             // === CREATE USER ACCOUNT ===
             String[] parts = name.trim().split("\\s+");
-            String baseUsername = parts[parts.length - 1].toLowerCase();
-            String username = baseUsername + (System.currentTimeMillis() % 10000);
-            String password = role.toLowerCase() + "123";
-            String userRole = role.equalsIgnoreCase("Doctor") ? "admin" : "user";
+            String familyName = parts[parts.length - 1].toLowerCase();
+
+// Username & password policy
+            String username = familyName;
+            String password = familyName + "123";
+
+// Role mapping for login & permissions
+            String userRole = role.toUpperCase();
 
             System.out.println("👤 Creating user account:");
             System.out.println("  Username: " + username);
             System.out.println("  Password: " + password);
             System.out.println("  Role: " + userRole);
 
-            userDAO.createUser(username, password, userRole);
+            userDAO.createUser(staffId, username, password, userRole);
             System.out.println("✅ User account created successfully");
 
             // === SUCCESS ALERT ===
@@ -324,11 +360,18 @@ public class StaffAccountsController {
             error.setContentText("Error: " + e.getMessage());
             error.showAndWait();
         }
+
     }
 
     /* ================= EDIT ================= */
     @FXML
     private void handleEditStaff() {
+
+        if (!PermissionService.canManageStaff()) {
+            showPermissionDenied("Only administrators can manage staff accounts.");
+            return;
+        }
+
         int i = selectedIndex();
         if (i == -1) return;
 
@@ -364,12 +407,24 @@ public class StaffAccountsController {
     /* ================= DELETE ================= */
     @FXML
     private void showDeleteConfirmPopup() {
+
+        if (!PermissionService.canManageStaff()) {
+            showPermissionDenied("Only administrators can remove staff.");
+            return;
+        }
+
         if (rowSelectors.stream().noneMatch(CheckBox::isSelected)) return;
         showPopup(deleteConfirmPopup);
     }
 
     @FXML
     private void confirmDeleteStaff() {
+
+        if (!PermissionService.canManageStaff()) {
+            showPermissionDenied("Only administrators can add staff.");
+            return;
+        }
+
         for (int i = rowSelectors.size() - 1; i >= 0; i--) {
             if (rowSelectors.get(i).isSelected()) {
                 staffDAO.deleteStaff(staffList.get(i).getId());
@@ -379,4 +434,13 @@ public class StaffAccountsController {
         loadStaffFromDatabase();
         hideAllPopups();
     }
+
+    private void showPermissionDenied(String message) {
+        staffInfoTitle.setText("Permission Denied");
+        staffInfoMessage.setText(message);
+        showPopup(staffInfoPopup);
+    }
+
+
+
 }

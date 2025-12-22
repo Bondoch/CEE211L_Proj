@@ -1,5 +1,6 @@
 package com.example.triage.controllers;
 
+import com.example.triage.services.PermissionService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -40,6 +41,8 @@ public class FacilitiesController {
 
 
 
+
+
     /* REMOVE FACILITY */
     @FXML private VBox removeFacilityPanel;
     @FXML private ComboBox<String> removeFacilitySelector;
@@ -76,6 +79,7 @@ public class FacilitiesController {
        ================================ */
     @FXML
     public void initialize() {
+
         setupEditMode();
         loadFacilities();
         setupSelectors();
@@ -94,7 +98,32 @@ public class FacilitiesController {
         addFacilityRooms.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 0)
         );
+
+        /* 🔐 PERMISSION GATE — VIEW ONLY FOR NON-ADMINS */
+        if (!PermissionService.canManageFacilities()) {
+
+            // Disable mutation buttons
+            editFacilityBtn.setDisable(true);
+
+            // Prevent edit panels from ever showing
+            editFacilityPanel.setVisible(false);
+            editFacilityPanel.setManaged(false);
+
+            addFacilityOverlay.setVisible(false);
+            addFacilityOverlay.setManaged(false);
+
+            removeFacilityOverlay.setVisible(false);
+            removeFacilityOverlay.setManaged(false);
+
+            // Optional UX hint
+            Tooltip.install(
+                    editFacilityBtn,
+                    new Tooltip("Administrator access required")
+            );
+        }
     }
+
+
 
 
     /* ================================
@@ -273,6 +302,12 @@ public class FacilitiesController {
     }
 
     @FXML private void handleEditFacility() {
+
+        if (!PermissionService.canManageFacilities()) {
+            showPermissionDenied("Only administrators can manage facilities.");
+            return;
+        }
+
         editMode = true;
         editFacilityPanel.setVisible(true);
         editFacilityPanel.setManaged(true);
@@ -304,6 +339,12 @@ public class FacilitiesController {
 
     @FXML
     private void handleAddFacility() {
+
+        if (!PermissionService.canManageFacilities()) {
+            showPermissionDenied("Only administrators can add facilities.");
+            return;
+        }
+
         addFacilityOverlay.setVisible(true);
         addFacilityOverlay.setManaged(true);
         removeFacilityPanel.setVisible(false);
@@ -392,6 +433,12 @@ public class FacilitiesController {
 
     @FXML
     private void handleRemoveFacility() {
+
+        if (!PermissionService.canManageFacilities()) {
+            showPermissionDenied("Only administrators can remove facilities.");
+            return;
+        }
+
         removeFacilityOverlay.setVisible(true);
         removeFacilityOverlay.setManaged(true);
 
@@ -688,9 +735,11 @@ public class FacilitiesController {
         return msg.toString();
     }
 
-
-
-
+    private void showPermissionDenied(String message) {
+        deleteBlockedMessage.setText(message);
+        deleteBlockedOverlay.setVisible(true);
+        deleteBlockedOverlay.setManaged(true);
+    }
 
 
 }

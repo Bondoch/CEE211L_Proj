@@ -32,8 +32,8 @@ public class LoginController {
 
     @FXML
     private void onLoginButtonClick() {
-        String username = usernameField.getText().trim();
-        String password = passwordField.getText();
+        String username = usernameField.getText().trim().toLowerCase();
+        String password = passwordField.getText().trim();
 
         hideError();
 
@@ -53,18 +53,21 @@ public class LoginController {
 
     private boolean authenticateUser(String username, String password) {
         String sql = "SELECT id, username, role FROM users WHERE username = ? AND password = ?";
+        System.out.println("🔐 Login attempt:");
+        System.out.println("  Username entered: " + username);
+        System.out.println("  Password entered: " + password);
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, username);
+            stmt.setString(1, username.toLowerCase());
             stmt.setString(2, password);
 
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
                 int userId = rs.getInt("id");
-                String role = rs.getString("role");
+                String role = rs.getString("role").toUpperCase();
 
                 // Start session
                 SessionManager.getInstance().startSession(userId, username, role);

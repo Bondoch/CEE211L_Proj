@@ -135,8 +135,8 @@
             <!-- ✨ Two Column Layout (Facility Status + Recent Activity) -->
             <GridPane hgap="20" vgap="20">
                 <columnConstraints>
-                    <ColumnConstraints percentWidth="50"/>
-                    <ColumnConstraints percentWidth="50"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
+                    <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
 
                 <!-- ✨ Facility Capacity Overview -->
@@ -170,7 +170,10 @@
 
                     <ScrollPane fitToWidth="true" prefHeight="280" maxHeight="280"
                                 style="-fx-background-color: transparent; -fx-background: transparent;">
-                        <VBox fx:id="recentActivityContainer" spacing="10">
+                    <VBox fx:id="recentActivityContainer"
+                          spacing="10"
+                          prefHeight="280"
+                          maxHeight="280">
                             <!-- Dynamically populated -->
                         </VBox>
                     </ScrollPane>

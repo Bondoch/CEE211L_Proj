@@ -8,6 +8,36 @@ import java.util.List;
 
 public class FacilityDAO {
 
+    public String getFacilityTypeByUnitId(int unitId) {
+
+        String sql = """
+        SELECT fac.type
+        FROM units u
+        JOIN floors f ON f.id = u.floor_id
+        JOIN facilities fac ON fac.id = f.facility_id
+        WHERE u.id = ?
+    """;
+
+        try (
+                Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
+            ps.setInt(1, unitId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("type");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
     public List<String> getAllFacilities() {
 
         List<String> facilities = new ArrayList<>();

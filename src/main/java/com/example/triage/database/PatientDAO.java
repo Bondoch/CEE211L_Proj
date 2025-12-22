@@ -127,15 +127,26 @@ public class PatientDAO {
         return list;
     }
 
-    private int getUnitIdByLabel(String label) throws SQLException {
-        try (Connection c = DBConnection.getConnection();
-             PreparedStatement ps = c.prepareStatement(
-                     "SELECT id FROM units WHERE label=?")) {
+    public int getUnitIdByLabel(String label) {
+        String sql = "SELECT id FROM units WHERE label = ?";
+
+        try (
+                Connection conn = DBConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(sql)
+        ) {
+
             ps.setString(1, label);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) return rs.getInt(1);
+
+            if (rs.next()) {
+                return rs.getInt("id");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        throw new SQLException("Unit not found");
+
+        return -1;
     }
 
     public void updatePatientEdit(
