@@ -19,6 +19,9 @@ import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 import java.util.prefs.Preferences;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+
 
 public class LoginController {
 
@@ -27,6 +30,15 @@ public class LoginController {
     @FXML private Label errorLabel;
     @FXML private HBox errorContainer;
     @FXML private CheckBox rememberMeCheckBox;
+
+    @FXML private javafx.scene.layout.Pane adminSetupBackdrop;
+    @FXML private javafx.scene.layout.VBox adminSetupCard;
+
+    @FXML private TextField adminUsernameField;
+    @FXML private PasswordField adminPasswordField;
+    @FXML private PasswordField adminConfirmField;
+    @FXML private Label adminSetupErrorLabel;
+
 
     private Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
 
@@ -51,45 +63,86 @@ public class LoginController {
         }
     }
 
+    @FXML
+    private void onCreateAccountClick() {
+        showAdminSetupOverlay();
+    }
+
+    private void showAdminSetupOverlay() {
+        adminSetupBackdrop.setVisible(true);
+        adminSetupBackdrop.setManaged(true);
+
+        adminSetupCard.setVisible(true);
+        adminSetupCard.setManaged(true);
+
+        clearAdminSetupForm();
+    }
+
+    @FXML
+    private void hideAdminSetup() {
+        adminSetupBackdrop.setVisible(false);
+        adminSetupBackdrop.setManaged(false);
+
+        adminSetupCard.setVisible(false);
+        adminSetupCard.setManaged(false);
+
+        clearAdminSetupForm();
+    }
+
+
+    private void clearAdminSetupForm() {
+        if (adminUsernameField != null) adminUsernameField.clear();
+        if (adminPasswordField != null) adminPasswordField.clear();
+        if (adminConfirmField != null) adminConfirmField.clear();
+
+        if (adminSetupErrorLabel != null) {
+            adminSetupErrorLabel.setText("");
+            adminSetupErrorLabel.setVisible(false);
+            adminSetupErrorLabel.setManaged(false);
+        }
+    }
+
+
+
+
     private boolean authenticateUser(String username, String password) {
-        String sql = "SELECT id, username, role FROM users WHERE username = ? AND password = ?";
-        System.out.println("🔐 Login attempt:");
-        System.out.println("  Username entered: " + username);
-        System.out.println("  Password entered: " + password);
+
+        String sql = """
+        SELECT u.id AS user_id,
+               u.staff_id,
+               u.role
+        FROM users u
+        WHERE u.username = ? AND u.password = ?
+    """;
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, username.toLowerCase());
+            stmt.setString(1, username);
             stmt.setString(2, password);
 
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                int userId = rs.getInt("id");
+                int userId  = rs.getInt("user_id");
+                int staffId = rs.getInt("staff_id");
                 String role = rs.getString("role").toUpperCase();
 
-                // Start session
-                SessionManager.getInstance().startSession(userId, username, role);
+                SessionManager.getInstance()
+                        .startSession(userId, staffId, username, role);
 
-                // Save username if Remember Me is checked
-                if (rememberMeCheckBox.isSelected()) {
-                    prefs.put("savedUsername", username);
-                    prefs.putBoolean("rememberMe", true);
-                } else {
-                    prefs.remove("savedUsername");
-                    prefs.putBoolean("rememberMe", false);
-                }
                 return true;
             }
+
             return false;
 
         } catch (Exception e) {
             e.printStackTrace();
-            showError("Database connection error. Please contact IT support.");
+            showError("Database connection error.");
             return false;
         }
     }
+
 
     private void loadDashboard() {
         FadeTransition fade = new FadeTransition(Duration.millis(300), usernameField.getScene().getRoot());
@@ -171,4 +224,78 @@ public class LoginController {
         hideError();
         loadSavedCredentials();
     }
+
+    @FXML
+    private void handleCreateAdminOverlay() {
+
+        String username = adminUsernameField.getText().trim().toLowerCase();
+        String password = adminPasswordField.getText();
+        String confirm  = adminConfirmField.getText();
+
+        adminSetupErrorLabel.setVisible(false);
+        adminSetupErrorLabel.setManaged(false);
+        adminSetupErrorLabel.setText("");
+
+        // Validation
+        if (username.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
+            showAdminError("All fields are required.");
+            return;
+        }
+
+        if (!password.equals(confirm)) {
+            showAdminError("Passwords do not match.");
+            return;
+        }
+
+        // 🔒 Admin already exists
+        if (adminExists()) {
+            showAdminError("Administrator setup has already been completed.");
+            return;
+        }
+
+        String sql = "INSERT INTO users (username, password, role) VALUES (?, ?, 'admin')";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, username);
+            stmt.setString(2, password); // (hashing later if required)
+            stmt.executeUpdate();
+
+            // ✅ Success
+            hideAdminSetup();
+            showError("Admin account created. You may now log in.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAdminError("Failed to create admin account.");
+        }
+    }
+
+
+    private boolean adminExists() {
+        String sql = "SELECT COUNT(*) FROM users WHERE role = 'admin'";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true; // fail-safe: block creation
+    }
+
+
+    private void showAdminError(String message) {
+        adminSetupErrorLabel.setText(message);
+        adminSetupErrorLabel.setVisible(true);
+        adminSetupErrorLabel.setManaged(true);
+    }
+
+
 }

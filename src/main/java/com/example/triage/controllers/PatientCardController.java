@@ -23,6 +23,9 @@ public class PatientCardController {
     @FXML private Label severityLabel;
     @FXML private Label facilityFloorLabel;
 
+    @FXML private Label referralBadge;
+
+
     private Patient patient;
 
     /* ================= INITIALIZE ================= */
@@ -67,6 +70,15 @@ public class PatientCardController {
 
         severityLabel.setText(capitalize(patient.getSeverity()));
         applySeverityStyle(patient.getSeverity());
+
+        if ("PENDING".equals(patient.getReferralStatus())) {
+            referralBadge.setVisible(true);
+            referralBadge.setManaged(true);
+            root.setStyle(root.getStyle()
+                    + "-fx-border-color: #ff9800;"
+                    + "-fx-background-color: #fff8e1;"
+            );
+        }
 
         root.setOnMouseClicked(e -> onClick.run());
     }

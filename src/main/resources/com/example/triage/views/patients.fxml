@@ -495,22 +495,13 @@
                         </graphic>
                     </Button>
 
-                    <Button text="Refer"
-                            prefHeight="40"
-                            HBox.hgrow="ALWAYS"
-                            style="-fx-background-color: #f8f9fa;
-                                   -fx-text-fill: #034c81;
-                                   -fx-font-size: 13px;
-                                   -fx-font-weight: bold;
-                                   -fx-background-radius: 8;
-                                   -fx-border-color: #e0e0e0;
-                                   -fx-border-radius: 8;
-                                   -fx-border-width: 1;
-                                   -fx-cursor: hand;">
-                        <graphic>
-                            <FontIcon iconLiteral="fas-share" iconSize="14" iconColor="#034c81"/>
-                        </graphic>
-                    </Button>
+                <VBox fx:id="referralContainer"
+                      spacing="6"
+                      alignment="CENTER"
+                      HBox.hgrow="ALWAYS">
+
+
+               </VBox>
                 </HBox>
 
                 <Button text="Discharge Patient"
@@ -764,6 +755,12 @@
 
         </VBox>
 
+        <!-- ===== REFERRAL BACKDROP ===== -->
+        <Pane fx:id="referralBackdrop"
+              visible="false"
+              managed="false"
+              StackPane.alignment="CENTER"
+              style="-fx-background-color: rgba(0,0,0,0.35);" />
 
 
 

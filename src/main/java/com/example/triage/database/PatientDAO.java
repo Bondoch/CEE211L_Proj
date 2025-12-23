@@ -18,33 +18,58 @@ public class PatientDAO {
         List<Patient> list = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
-            SELECT p.*, u.id AS unit_id, u.label AS unit_label,
-                   fac.name AS facility_name, f.floor_number
-            FROM patients p
-            JOIN units u ON p.unit_id=u.id
-            JOIN floors f ON u.floor_id=f.id
-            JOIN facilities fac ON f.facility_id=fac.id
-            WHERE p.status='admitted'
-        """);
+        SELECT p.*,
+               p.referral_status,
+               p.referral_facility,
+               p.referral_floor,
+               u.id AS unit_id,
+               u.label AS unit_label,
+               fac.name AS facility_name,
+               f.floor_number
+        FROM patients p
+        LEFT JOIN units u ON p.unit_id = u.id
+        LEFT JOIN floors f ON u.floor_id = f.id
+        LEFT JOIN facilities fac ON f.facility_id = fac.id
+        WHERE p.status = 'admitted'
+    """);
 
-        if (facility != null) sql.append(" AND fac.name=?");
-        if (floor != null) sql.append(" AND f.floor_number=?");
-        if (severity != null) sql.append(" AND p.severity=?");
-        if (search != null)
+        if (facility != null) {
+            sql.append(" AND (fac.name = ? OR p.referral_facility = ?)");
+        }
+        if (floor != null) {
+            sql.append(" AND f.floor_number = ?");
+        }
+        if (severity != null) {
+            sql.append(" AND p.severity = ?");
+        }
+        if (search != null) {
             sql.append(" AND (LOWER(p.full_name) LIKE ? OR LOWER(p.patient_code) LIKE ?)");
+        }
 
-        if (sort == SortMode.ADMISSION_DATE)
+        if (sort == SortMode.ADMISSION_DATE) {
             sql.append(" ORDER BY p.admission_date DESC");
-        else if (sort == SortMode.BED_ROOM)
+        } else if (sort == SortMode.BED_ROOM) {
             sql.append(" ORDER BY u.label");
+        }
 
         try (Connection c = DBConnection.getConnection();
              PreparedStatement ps = c.prepareStatement(sql.toString())) {
 
             int i = 1;
-            if (facility != null) ps.setString(i++, facility);
-            if (floor != null) ps.setInt(i++, floor);
-            if (severity != null) ps.setString(i++, severity.toLowerCase());
+
+            if (facility != null) {
+                ps.setString(i++, facility); // fac.name
+                ps.setString(i++, facility); // p.referral_facility
+            }
+
+            if (floor != null) {
+                ps.setInt(i++, floor);
+            }
+
+            if (severity != null) {
+                ps.setString(i++, severity.toLowerCase());
+            }
+
             if (search != null) {
                 String s = "%" + search.toLowerCase() + "%";
                 ps.setString(i++, s);
@@ -52,8 +77,9 @@ public class PatientDAO {
             }
 
             ResultSet rs = ps.executeQuery();
+
             while (rs.next()) {
-                list.add(new Patient(
+                Patient p = new Patient(
                         rs.getInt("id"),
                         rs.getString("patient_code"),
                         rs.getString("full_name"),
@@ -65,13 +91,22 @@ public class PatientDAO {
                         rs.getString("unit_label"),
                         rs.getString("facility_name"),
                         rs.getInt("floor_number")
-                ));
+                );
+
+                p.setReferralStatus(rs.getString("referral_status"));
+                p.setReferralFacility(rs.getString("referral_facility"));
+                p.setReferralFloor(rs.getInt("referral_floor"));
+
+                list.add(p);
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
         return list;
     }
+
     public void dischargePatient(int patientId, int unitId) {
 
         String deletePatient = "DELETE FROM patients WHERE id = ?";
@@ -198,5 +233,123 @@ public class PatientDAO {
             e.printStackTrace();
         }
     }
+
+
+    public void requestReferral(int patientId, String facility, String floor) {
+        String sql = """
+        UPDATE patients
+        SET referral_status = 'PENDING',
+            referral_facility = ?,
+            referral_floor = ?
+        WHERE id = ?
+    """;
+
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setString(1, facility);
+            ps.setInt(2, Integer.parseInt(floor.replaceAll("\\D+", "")));
+            ps.setInt(3, patientId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void approveReferral(int patientId) {
+
+        String getReferralSql = """
+        SELECT referral_facility, referral_floor, unit_id
+        FROM patients
+        WHERE id = ?
+    """;
+
+        String findUnitSql = """
+        SELECT u.id
+        FROM units u
+        JOIN floors f ON u.floor_id = f.id
+        JOIN facilities fac ON f.facility_id = fac.id
+        WHERE fac.name = ?
+          AND f.floor_number = ?
+          AND u.status = 'AVAILABLE'
+        LIMIT 1
+    """;
+
+        try (Connection c = DBConnection.getConnection()) {
+
+            // 1️⃣ Get referral info
+            PreparedStatement ps1 = c.prepareStatement(getReferralSql);
+            ps1.setInt(1, patientId);
+            ResultSet rs = ps1.executeQuery();
+
+            if (!rs.next()) return;
+
+            String facility = rs.getString("referral_facility");
+            int floor = rs.getInt("referral_floor");
+            int oldUnit = rs.getInt("unit_id");
+
+            // 2️⃣ Find available unit
+            PreparedStatement ps2 = c.prepareStatement(findUnitSql);
+            ps2.setString(1, facility);
+            ps2.setInt(2, floor);
+            ResultSet rs2 = ps2.executeQuery();
+
+            if (!rs2.next()) return;
+
+            int newUnit = rs2.getInt("id");
+
+            // 3️⃣ Free old unit
+            c.prepareStatement(
+                    "UPDATE units SET status='AVAILABLE' WHERE id=" + oldUnit
+            ).execute();
+
+            // 4️⃣ Occupy new unit
+            c.prepareStatement(
+                    "UPDATE units SET status='OCCUPIED' WHERE id=" + newUnit
+            ).execute();
+
+            // 5️⃣ Update patient (NO TEXT BLOCK HERE)
+            c.prepareStatement(
+                    "UPDATE patients SET " +
+                            "unit_id=" + newUnit + ", " +
+                            "referral_status='NONE', " +
+                            "referral_facility=NULL, " +
+                            "referral_floor=NULL " +
+                            "WHERE id=" + patientId
+            ).execute();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+    public void declineReferral(int patientId) {
+        String sql = """
+        UPDATE patients
+        SET referral_status = 'DECLINED',
+            referral_facility = NULL,
+            referral_floor = NULL
+        WHERE id = ?
+    """;
+
+        try (Connection c = DBConnection.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+
+            ps.setInt(1, patientId);
+            ps.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
 
 }

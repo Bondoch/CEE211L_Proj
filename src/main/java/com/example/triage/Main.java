@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
 
-import com.example.triage.services.UserService;
 import com.example.triage.services.CapacityMonitor; // ✅ ADD THIS IMPORT
 
 public class Main extends Application {
@@ -15,17 +14,10 @@ public class Main extends Application {
     public void start(Stage stage) {
         try {
 
-            FXMLLoader loader;
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/triage/views/login-view.fxml")
+            );
 
-            if (UserService.isUserTableEmpty()) {
-                loader = new FXMLLoader(
-                        getClass().getResource("/com/triage/app/views/setup-admin.fxml")
-                );
-            } else {
-                loader = new FXMLLoader(
-                        getClass().getResource("/com/example/triage/views/login-view.fxml")
-                );
-            }
 
             Parent root = loader.load();
 

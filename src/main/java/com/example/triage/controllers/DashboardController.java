@@ -1,5 +1,6 @@
 package com.example.triage.controllers;
 
+import com.example.triage.database.DBConnection;
 import com.example.triage.services.SessionManager;
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
@@ -12,6 +13,10 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class DashboardController {
 
@@ -30,6 +35,10 @@ public class DashboardController {
     @FXML private Label titleLabel;
     @FXML private VBox logoutPanel;
 
+    @FXML private Label userNameLabel;
+    @FXML private Label userRoleLabel;
+
+
     private boolean menuOpen = false;
     private static final double SIDEBAR_WIDTH = 240;
 
@@ -44,6 +53,20 @@ public class DashboardController {
         overlay.prefWidthProperty().bind(contentWrapper.widthProperty());
         overlay.prefHeightProperty().bind(contentWrapper.heightProperty());
 
+        SessionManager session = SessionManager.getInstance();
+
+        loadUserName(session.getStaffId());
+
+        userRoleLabel.setText(
+                switch (session.getRole()) {
+                    case "ADMIN" -> "Administrator";
+                    case "DOCTOR" -> "Doctor";
+                    case "NURSE" -> "Nurse";
+                    default -> session.getRole();
+                }
+        );
+
+
         overlay.setOnMouseClicked(e -> {
             if (menuOpen) toggleSidebar();
         });
@@ -55,7 +78,38 @@ public class DashboardController {
         itemSettings.setOnMouseClicked(e -> selectMenu(itemSettings, "Settings"));
 
         selectMenu(itemDashboard, "Dashboard");
+
+
     }
+
+    private void loadUserName(int staffId) {
+
+        if (staffId == 0) {
+            userNameLabel.setText("Administrator");
+            return;
+        }
+
+        String sql = "SELECT first_name, last_name FROM staff WHERE id = ?";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, staffId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                userNameLabel.setText(
+                        rs.getString("first_name") + " " + rs.getString("last_name")
+                );
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            userNameLabel.setText("User");
+        }
+    }
+
+
 
     @FXML
     private void toggleSidebar() {
@@ -170,4 +224,8 @@ public class DashboardController {
             e.printStackTrace();
         }
     }
+    private String formatRole(String role) {
+        return role.charAt(0) + role.substring(1).toLowerCase();
+    }
+
 }

@@ -3,6 +3,8 @@ package com.example.triage.controllers;
 import com.example.triage.services.PermissionService;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.animation.FadeTransition;
@@ -28,6 +30,9 @@ public class PatientsController {
     @FXML private TextField addPatientDiagnosis;
     @FXML private ComboBox<String> addPatientGender;
     @FXML private ComboBox<String> addPatientSeverity;
+    // ===== ROOT STACK (for overlays / popups) =====
+    @FXML private StackPane patientStack;
+
 
 
 
@@ -61,6 +66,9 @@ public class PatientsController {
     @FXML private ComboBox<String> editFloor;
     @FXML private ComboBox<String> editUnit;
 
+    @FXML private VBox referralContainer;
+
+
     private final PatientDAO patientDAO = new PatientDAO();
     private final FacilityDAO facilityDAO = new FacilityDAO();
     private final FloorDAO floorDAO = new FloorDAO();
@@ -77,6 +85,14 @@ public class PatientsController {
     @FXML
     public void initialize() {
 
+        severityToggle.selectedProperty().addListener((obs, o, isOn) -> {
+            severityBox.setDisable(!isOn);
+            loadPatientsUnified();
+        });
+        severityBox.setDisable(true);
+
+
+
         facilityCombo.getItems().setAll(facilityDAO.getAllFacilities());
 
         facilityCombo.setOnAction(e -> {
@@ -85,7 +101,12 @@ public class PatientsController {
             floorCombo.setDisable(false);
         });
 
-        floorCombo.setOnAction(e -> loadPatientsUnified());
+        floorCombo.setOnAction(e -> {
+            if (facilityCombo.getValue() != null && floorCombo.getValue() != null) {
+                loadPatientsUnified();
+            }
+        });
+
 
         severityBox.getItems().addAll("Moderate", "High", "Critical");
         severityToggle.selectedProperty().addListener((a,b,c)->loadPatientsUnified());
@@ -124,6 +145,205 @@ public class PatientsController {
 
     }
 
+    private void renderReferralUI(Patient p) {
+        referralContainer.getChildren().clear();
+
+        String status = p.getReferralStatus();
+        boolean isAdmin = PermissionService.isAdminOrDoctor();
+
+        // ===== PENDING STATE =====
+        if ("PENDING".equals(status)) {
+
+            Label title = new Label("Referral Pending");
+            title.setStyle("""
+        -fx-font-size: 13px;
+        -fx-font-weight: bold;
+        -fx-text-fill: #ff9800;
+    """);
+
+            Label target = new Label(
+                    p.getReferralFacility() + " (Floor " + p.getReferralFloor() + ")"
+            );
+            target.setStyle("""
+        -fx-font-size: 12px;
+        -fx-text-fill: #6b7280;
+    """);
+
+            VBox pendingBox = new VBox(2, title, target);
+
+            referralContainer.getChildren().add(pendingBox);
+
+            if (isAdmin) {
+                referralContainer.getChildren().add(createApprovalButtons(p));
+            }
+
+            return;
+        }
+
+
+        // ===== NO REFERRAL / DECLINED =====
+        if ("DECLINED".equals(status)) {
+
+            Label declined = new Label("Referral request was declined");
+            declined.setStyle("""
+        -fx-text-fill: #d32f2f;
+        -fx-font-size: 12px;
+        -fx-font-weight: bold;
+    """);
+
+            referralContainer.getChildren().add(declined);
+            return;
+        }
+
+        // ===== NO REFERRAL (ONLY LOWER STAFF CAN REQUEST) =====
+        if ("NONE".equals(status)) {
+            HBox actions = new HBox(10);
+            actions.setAlignment(Pos.CENTER_LEFT);
+
+            actions.getChildren().add(createRequestButton(p));
+            referralContainer.getChildren().add(actions);
+        }
+
+
+
+
+    }
+
+
+
+    private Button createRequestButton(Patient p) {
+        Button btn = new Button("Referral");
+
+        // icon (same visual scale as edit)
+        Label icon = new Label("↗"); // referral-style arrow
+        icon.setStyle("""
+        -fx-font-size: 12px;
+        -fx-text-fill: #034c81;
+    """);
+
+        btn.setGraphic(icon);
+        btn.setContentDisplay(ContentDisplay.LEFT);
+        btn.setGraphicTextGap(6);
+
+        btn.setPrefHeight(32);
+        btn.setPrefWidth(90);
+        btn.setMaxWidth(90);
+
+        btn.setOnAction(e -> openReferralPopup(p));
+
+        btn.setStyle("""
+        -fx-background-color: #f8f9fa;
+        -fx-text-fill: #034c81;
+        -fx-font-size: 12px;
+        -fx-font-weight: bold;
+        -fx-background-radius: 6;
+        -fx-border-color: #e0e0e0;
+        -fx-border-radius: 6;
+        -fx-cursor: hand;
+    """);
+
+        return btn;
+    }
+
+
+
+
+
+    private Label createPendingIndicator() {
+        Label label = new Label("Referral Pending");
+        label.setStyle("""
+        -fx-text-fill: #9e9e9e;
+        -fx-font-style: italic;
+    """);
+        return label;
+    }
+
+    private HBox createApprovalButtons(Patient p) {
+        Button accept = new Button("Accept");
+        Button decline = new Button("Decline");
+
+        // Shared sizing
+        accept.setPrefHeight(32);
+        decline.setPrefHeight(32);
+
+        // Accept = primary (blue)
+        accept.setStyle("""
+        -fx-background-color: #1e88e5;
+        -fx-text-fill: white;
+        -fx-font-weight: bold;
+        -fx-background-radius: 6;
+        -fx-cursor: hand;
+    """);
+
+        // Decline = neutral / danger outline
+        decline.setStyle("""
+        -fx-background-color: #f5f5f5;
+        -fx-text-fill: #d32f2f;
+        -fx-font-weight: bold;
+        -fx-background-radius: 6;
+        -fx-border-color: #d32f2f;
+        -fx-cursor: hand;
+    """);
+
+        accept.setOnAction(e -> approveReferral(p));
+        decline.setOnAction(e -> declineReferral(p));
+
+        HBox box = new HBox(8, accept, decline);
+        box.setAlignment(Pos.CENTER_LEFT);
+
+        return box;
+    }
+
+
+    private void approveReferral(Patient p) {
+        patientDAO.approveReferral(p.getId());
+        handleCloseDetail();     // ✅ close stale popup
+        loadPatientsUnified();  // ✅ reload fresh data
+    }
+
+
+    private void declineReferral(Patient p) {
+        patientDAO.declineReferral(p.getId());
+
+        showInlineMessage(
+                "Referral request declined.",
+                "-fx-text-fill: #d32f2f;"
+        );
+
+        handleCloseDetail();     // ✅ close stale popup
+        loadPatientsUnified();
+    }
+
+
+
+    private void openReferralPopup(Patient p) {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/com/example/triage/views/referral-popup.fxml")
+            );
+            Parent popup = loader.load();
+
+            ReferralPopupController controller = loader.getController();
+            controller.init(p, () -> {
+                patientStack.getChildren().remove(popup);
+                loadPatientsUnified();
+                loadPatientsUnified();   // refresh after request
+                handleCloseDetail();     // optional UX
+            });
+
+            StackPane.setAlignment(popup, Pos.CENTER);
+            patientStack.getChildren().add(popup);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+
+
+
+
     private void loadPatientsUnified() {
 
         patientGrid.getChildren().clear();
@@ -133,7 +353,11 @@ public class PatientsController {
                 ? null
                 : Integer.parseInt(floorCombo.getValue().replaceAll("\\D+",""));
 
-        String severity = severityToggle.isSelected() ? severityBox.getValue() : null;
+        String severity =
+                (severityToggle.isSelected() && severityBox.getValue() != null)
+                        ? severityBox.getValue()
+                        : null;
+
         String search = searchField.getText().isBlank() ? null : searchField.getText();
 
         List<Patient> patients = patientDAO.getPatientsFiltered(
@@ -185,6 +409,8 @@ public class PatientsController {
         detailAdmission.setText(
                 p.getAdmissionDate().toLocalDateTime().format(FORMATTER)
         );
+
+        renderReferralUI(p); // ✅ THIS WAS MISSING
 
         detailBackdrop.setVisible(true);
         detailBackdrop.setManaged(true);
@@ -381,6 +607,18 @@ public class PatientsController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
+    private void showInlineMessage(String text, String style) {
+        Label msg = new Label(text);
+        msg.setStyle("""
+        -fx-font-size: 12px;
+        -fx-font-weight: bold;
+        """ + style);
+
+        referralContainer.getChildren().clear();
+        referralContainer.getChildren().add(msg);
+    }
+
 
 
 }

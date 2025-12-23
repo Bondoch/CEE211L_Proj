@@ -41,7 +41,10 @@
     </AnchorPane>
 
     <!-- ========== RIGHT SIDE: LOGIN FORM ========== -->
-    <StackPane style="-fx-background-color: #FFFFFF;" HBox.hgrow="ALWAYS">
+    <StackPane style="-fx-background-color: #FFFFFF;"
+               prefWidth="520"
+               minWidth="520"
+               maxWidth="520">
         <VBox alignment="CENTER" maxWidth="480" spacing="35">
             <padding>
                 <Insets left="50" right="50" />
@@ -92,8 +95,25 @@
 
                 <!-- Remember Me & Forgot Password -->
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <CheckBox fx:id="rememberMeCheckBox" style="-fx-text-fill: #7f858c; -fx-font-size: 13px;" text="Remember me" />
+
+                    <!-- Remember Me (LEFT) -->
+                    <CheckBox fx:id="rememberMeCheckBox"
+                              style="-fx-text-fill: #7f858c; -fx-font-size: 13px;"
+                              text="Remember me" />
+
+                    <!-- Push Create Account to the RIGHT -->
+                    <Region HBox.hgrow="ALWAYS" />
+
+                    <!-- Create Account (RIGHT) -->
+                    <Button text="Create Account"
+                            onAction="#onCreateAccountClick"
+                            style="-fx-background-color: transparent;
+                   -fx-text-fill: #2ca3fa;
+                   -fx-font-size: 13px;
+                   -fx-padding: 0;
+                   -fx-cursor: hand;" />
                 </HBox>
+
 
                 <!-- Login Button -->
                 <Button maxWidth="Infinity" onAction="#onLoginButtonClick" prefHeight="52" style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);                                -fx-text-fill: white;                                -fx-font-size: 16px;                                -fx-font-weight: bold;                                -fx-background-radius: 10;                                -fx-cursor: hand;                                -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.3), 10, 0, 0, 3);">
@@ -128,6 +148,112 @@
             </HBox>
 
         </VBox>
+
+        <!-- ===== ADMIN SETUP OVERLAY BACKDROP ===== -->
+        <Pane fx:id="adminSetupBackdrop"
+              visible="false"
+              managed="false"
+              style="-fx-background-color: rgba(0,0,0,0.35);"
+              StackPane.alignment="CENTER"/>
+
+        <!-- ===== ADMIN SETUP CARD ===== -->
+        <VBox fx:id="adminSetupCard"
+              visible="false"
+              managed="false"
+              spacing="18"
+
+              prefWidth="420"
+              maxWidth="420"
+              maxHeight="360"
+
+
+              StackPane.alignment="CENTER"
+              style="-fx-background-color: white;
+             -fx-background-radius: 18;
+             -fx-padding: 22 22 20 22;
+             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0, 0, 5);">
+
+
+        <!-- ===== HEADER ===== -->
+            <VBox spacing="4">
+                <Label text="Initial Administrator Setup"
+                       style="-fx-font-size: 18px;
+                      -fx-font-weight: bold;
+                      -fx-text-fill: #034c81;"/>
+
+                <Label text="Create the primary admin account"
+                       style="-fx-font-size: 12px;
+                      -fx-text-fill: #7f858c;"/>
+            </VBox>
+
+            <Separator style="-fx-background-color: #e8e8e8;"/>
+
+            <!-- ===== FORM ===== -->
+            <VBox spacing="12">
+
+                <TextField fx:id="adminUsernameField"
+                           promptText="Admin Username"
+                           style="-fx-background-color: #f8f9fa;
+                          -fx-border-color: #e0e0e0;
+                          -fx-border-radius: 8;
+                          -fx-background-radius: 8;
+                          -fx-font-size: 13px;"/>
+
+                <PasswordField fx:id="adminPasswordField"
+                               promptText="Password"
+                               style="-fx-background-color: #f8f9fa;
+                              -fx-border-color: #e0e0e0;
+                              -fx-border-radius: 8;
+                              -fx-background-radius: 8;
+                              -fx-font-size: 13px;"/>
+
+                <PasswordField fx:id="adminConfirmField"
+                               promptText="Confirm Password"
+                               style="-fx-background-color: #f8f9fa;
+                              -fx-border-color: #e0e0e0;
+                              -fx-border-radius: 8;
+                              -fx-background-radius: 8;
+                              -fx-font-size: 13px;"/>
+            </VBox>
+
+            <!-- ===== ERROR ===== -->
+            <Label fx:id="adminSetupErrorLabel"
+                   visible="false"
+                   managed="false"
+                   style="-fx-text-fill: #ff6b6b;
+                  -fx-font-size: 12px;"/>
+
+            <Separator style="-fx-background-color: #e8e8e8;"/>
+
+            <!-- ===== ACTIONS ===== -->
+            <HBox spacing="10" alignment="CENTER_RIGHT">
+
+                <!-- Cancel -->
+                <Button text="Cancel"
+                        onAction="#hideAdminSetup"
+                        style="-fx-background-color: #f8f9fa;
+                       -fx-text-fill: #034c81;
+                       -fx-font-size: 13px;
+                       -fx-background-radius: 18;
+                       -fx-border-color: #e0e0e0;
+                       -fx-border-radius: 18;
+                       -fx-cursor: hand;"/>
+
+                <!-- Create -->
+                <Button text="Create Admin"
+                        onAction="#handleCreateAdminOverlay"
+                        style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);
+                       -fx-text-fill: white;
+                       -fx-font-size: 13px;
+                       -fx-font-weight: bold;
+                       -fx-background-radius: 18;
+                       -fx-cursor: hand;
+                       -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.35), 8, 0, 0, 2);"/>
+            </HBox>
+
+        </VBox>
+
+
     </StackPane>
 
 </HBox>

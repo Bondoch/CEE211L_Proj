@@ -4,44 +4,40 @@ public class SessionManager {
 
     private static SessionManager instance;
 
+    private int userId;
+    private int staffId;
     private String username;
     private String role;
-    private int userId;
 
     private SessionManager() {}
 
     public static SessionManager getInstance() {
-        if (instance == null) {
-            instance = new SessionManager();
-        }
+        if (instance == null) instance = new SessionManager();
         return instance;
     }
 
-    public void startSession(int userId, String username, String role) {
+    public void startSession(int userId, int staffId, String username, String role) {
         this.userId = userId;
+        this.staffId = staffId;
         this.username = username;
         this.role = role;
     }
 
-    public void endSession() {
-        this.userId = 0;
-        this.username = null;
-        this.role = null;
-    }
-
-    public String getUsername() {
-        return username;
+    public int getStaffId() {
+        return staffId;
     }
 
     public String getRole() {
         return role;
     }
 
-    public int getUserId() {
-        return userId;
-    }
-
-    public boolean isLoggedIn() {
-        return username != null && role != null;
+    public void endSession() {
+        userId = 0;
+        staffId = 0;
+        username = null;
+        role = null;
     }
 }
+
+
+

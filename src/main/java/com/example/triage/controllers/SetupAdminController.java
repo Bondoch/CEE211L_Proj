@@ -63,4 +63,5 @@ public class SetupAdminController {
             errorLabel.setText("Failed to create admin account.");
         }
     }
+
 }

@@ -18,6 +18,11 @@ public class Patient {
     private int unitId;
     private String facilityName;
     private int floorNumber;
+    private String referralStatus; // NONE, PENDING, APPROVED, DECLINED
+    private String referralFacility;
+    private int referralFloor;
+
+
 
 
     // ================= CONSTRUCTOR =================
@@ -79,4 +84,31 @@ public class Patient {
         LocalDateTime ldt = admissionDate.toLocalDateTime();
         return ldt.format(DateTimeFormatter.ofPattern("MMM dd, yyyy - hh:mm a"));
     }
+    public String getReferralStatus() {
+        return referralStatus == null ? "NONE" : referralStatus;
+    }
+
+    public void setReferralStatus(String referralStatus) {
+        this.referralStatus = referralStatus;
+    }
+
+    public String getReferralFacility() {
+        return referralFacility;
+    }
+
+    public void setReferralFacility(String referralFacility) {
+        this.referralFacility = referralFacility;
+    }
+
+
+
+    public int getReferralFloor() {
+        return referralFloor;
+    }
+
+    public void setReferralFloor(int referralFloor) {
+        this.referralFloor = referralFloor;
+    }
+
+
 }

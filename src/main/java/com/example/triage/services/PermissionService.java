@@ -1,5 +1,6 @@
 package com.example.triage.services;
 
+
 public class PermissionService {
 
 
@@ -24,6 +25,11 @@ public class PermissionService {
         return "nurse".equalsIgnoreCase(role())
                 || "technician".equalsIgnoreCase(role());
     }
+
+    public static boolean isAdminOrDoctor() {
+        return isAdmin() || isDoctor();
+    }
+
 
 
 
