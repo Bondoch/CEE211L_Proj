@@ -6,7 +6,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
 
-import com.example.triage.services.CapacityMonitor; // ✅ ADD THIS IMPORT
+import com.example.triage.services.CapacityMonitor;
 
 public class Main extends Application {
 
@@ -28,12 +28,12 @@ public class Main extends Application {
             stage.setMinHeight(600);
             stage.setResizable(true);
 
-            // ✅ Load system name from preferences
+            //  Load system name from preferences
             java.util.prefs.Preferences prefs = java.util.prefs.Preferences.userNodeForPackage(Main.class);
             String systemName = prefs.get("systemName", "LifeLine Triage System");
             stage.setTitle(systemName);
 
-            // ✅ INITIALIZE CAPACITY MONITORING
+            //  INITIALIZE CAPACITY MONITORING
             CapacityMonitor.getInstance().setPrimaryStage(stage);
             System.out.println("✅ Capacity monitoring initialized");
 
@@ -44,7 +44,7 @@ public class Main extends Application {
         }
     }
 
-    // ✅ CLEAN SHUTDOWN
+    //  CLEAN SHUTDOWN
     @Override
     public void stop() {
         System.out.println("🛑 Application shutting down...");

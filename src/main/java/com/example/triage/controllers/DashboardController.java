@@ -209,7 +209,6 @@ public class DashboardController {
 
     @FXML
     private void performLogout() {
-        // Clear session
         SessionManager.getInstance().endSession();
 
         try {

@@ -8,22 +8,17 @@
 <?import org.kordamp.ikonli.javafx.*?>
 
 <HBox prefHeight="700" prefWidth="1200" style="-fx-background-color: #FFFFFF;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.triage.controllers.LoginController">
-
     <!-- ========== LEFT SIDE: BRANDING/VISUAL ========== -->
-    <AnchorPane maxWidth="800" minWidth="400" prefWidth="600" style="-fx-background-color: linear-gradient(to bottom, #034c81, #2ca3fa);                        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 5, 0);" HBox.hgrow="ALWAYS">
-
+    <AnchorPane maxWidth="800" minWidth="400" prefWidth="600" style="-fx-background-color: linear-gradient(to bottom, #034c81, #2ca3fa); -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 20, 0, 5, 0);" HBox.hgrow="ALWAYS">
         <!-- Medical Cross Icon -->
         <StackPane AnchorPane.leftAnchor="150" AnchorPane.topAnchor="180" />
-
         <!-- System Name -->
         <VBox alignment="CENTER_LEFT" spacing="15" AnchorPane.leftAnchor="80" AnchorPane.rightAnchor="80" AnchorPane.topAnchor="340">
-
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Region prefHeight="3" prefWidth="50" style="-fx-background-color: #FFFFFF; -fx-background-radius: 2;" />
             </HBox>
             <Text style="-fx-font-size: 20px; -fx-fill: #FFFFFF; -fx-opacity: 0.9;" text="Triage Management System" />
         </VBox>
-
         <!-- Bottom Info -->
         <HBox alignment="CENTER" spacing="8" AnchorPane.bottomAnchor="50" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
             <FontIcon iconColor="#FFFFFF" iconLiteral="fas-shield-alt" iconSize="16" opacity="0.7" />
@@ -36,10 +31,8 @@
                 <Font name="System Bold" size="48" />
             </font>
         </Text>
-
         <Text layoutX="80.0" layoutY="413.0" style="-fx-font-size: 16px; -fx-fill: #FFFFFF; -fx-opacity: 0.8; -fx-font-style: italic;" text="Prioritizing Care, Saving Lives" />
     </AnchorPane>
-
     <!-- ========== RIGHT SIDE: LOGIN FORM ========== -->
     <StackPane style="-fx-background-color: #FFFFFF;"
                prefWidth="520"
@@ -50,20 +43,19 @@
                 <Insets left="50" right="50" />
             </padding>
 
-            <!-- Welcome Header -->
             <VBox alignment="CENTER" spacing="8">
                 <Text style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-fill: #034c81;" text="Welcome Back" />
                 <Text style="-fx-font-size: 14px; -fx-fill: #7f858c;" text="Please sign in to continue" />
             </VBox>
-
-            <!-- Login Form Card -->
-            <VBox spacing="25" style="-fx-background-color: #FFFFFF;                          -fx-background-radius: 12;                          -fx-border-color: #e8e8e8;                          -fx-border-width: 1;                          -fx-border-radius: 12;                          -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
-
+            <VBox spacing="25" style="-fx-background-color: #FFFFFF;
+             -fx-background-radius: 12;
+             -fx-border-color: #e8e8e8;
+             -fx-border-width: 1;
+             -fx-border-radius: 12;
+             -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 15, 0, 0, 3);">
                 <padding>
                     <Insets bottom="40" left="40" right="40" top="40" />
                 </padding>
-
-                <!-- Username Field with Icon -->
                 <VBox spacing="8">
                     <Label style="-fx-text-fill: #034c81; -fx-font-size: 13px; -fx-font-weight: bold;" text="Username" />
                     <HBox alignment="CENTER_LEFT" spacing="0" style="-fx-background-color: #f8f9fa;                                  -fx-border-color: #e0e0e0;                                  -fx-border-radius: 8;                                  -fx-background-radius: 8;">
@@ -78,7 +70,6 @@
                     </HBox>
                 </VBox>
 
-                <!-- Password Field with Icon -->
                 <VBox spacing="8">
                     <Label style="-fx-text-fill: #034c81; -fx-font-size: 13px; -fx-font-weight: bold;" text="Password" />
                     <HBox alignment="CENTER_LEFT" spacing="0" style="-fx-background-color: #f8f9fa;                                  -fx-border-color: #e0e0e0;                                  -fx-border-radius: 8;                                  -fx-background-radius: 8;">
@@ -93,18 +84,11 @@
                     </HBox>
                 </VBox>
 
-                <!-- Remember Me & Forgot Password -->
                 <HBox alignment="CENTER_LEFT" spacing="10">
-
-                    <!-- Remember Me (LEFT) -->
                     <CheckBox fx:id="rememberMeCheckBox"
                               style="-fx-text-fill: #7f858c; -fx-font-size: 13px;"
                               text="Remember me" />
-
-                    <!-- Push Create Account to the RIGHT -->
                     <Region HBox.hgrow="ALWAYS" />
-
-                    <!-- Create Account (RIGHT) -->
                     <Button text="Create Account"
                             onAction="#onCreateAccountClick"
                             style="-fx-background-color: transparent;
@@ -113,8 +97,6 @@
                    -fx-padding: 0;
                    -fx-cursor: hand;" />
                 </HBox>
-
-
                 <!-- Login Button -->
                 <Button maxWidth="Infinity" onAction="#onLoginButtonClick" prefHeight="52" style="-fx-background-color: linear-gradient(to right, #2ca3fa, #5ba2f4);                                -fx-text-fill: white;                                -fx-font-size: 16px;                                -fx-font-weight: bold;                                -fx-background-radius: 10;                                -fx-cursor: hand;                                -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.3), 10, 0, 0, 3);">
                     <graphic>
@@ -124,21 +106,17 @@
                         </HBox>
                     </graphic>
                 </Button>
-
                 <!-- Error Label -->
                 <HBox fx:id="errorContainer" alignment="CENTER_LEFT" managed="false" spacing="10" style="-fx-background-color: #fff3f3;                              -fx-border-color: #ff6b6b;                              -fx-border-width: 1;                              -fx-border-radius: 6;                              -fx-background-radius: 6;                              -fx-padding: 12;" visible="false">
                     <FontIcon iconColor="#ff6b6b" iconLiteral="fas-exclamation-circle" iconSize="16" />
                     <Label fx:id="errorLabel" maxWidth="Infinity" style="-fx-text-fill: #ff6b6b; -fx-font-size: 13px;" wrapText="true" HBox.hgrow="ALWAYS" />
                 </HBox>
-
             </VBox>
-
             <!-- Additional Info -->
             <HBox alignment="CENTER" spacing="5">
                 <Text style="-fx-font-size: 13px; -fx-fill: #7f858c;" text="Need help?" />
                 <Hyperlink style="-fx-text-fill: #2ca3fa; -fx-font-size: 13px;" text="Contact IT Support" />
             </HBox>
-
             <!-- Version Info -->
             <HBox alignment="CENTER" spacing="8">
                 <FontIcon iconColor="#c9bbaa" iconLiteral="fas-info-circle" iconSize="12" />
@@ -146,9 +124,7 @@
                 <Text style="-fx-font-size: 11px; -fx-fill: #c9bbaa;" text="•" />
                 <Text style="-fx-font-size: 11px; -fx-fill: #c9bbaa;" text="© 2024 LifeLine Healthcare" />
             </HBox>
-
         </VBox>
-
         <!-- ===== ADMIN SETUP OVERLAY BACKDROP ===== -->
         <Pane fx:id="adminSetupBackdrop"
               visible="false"
@@ -161,36 +137,27 @@
               visible="false"
               managed="false"
               spacing="18"
-
               prefWidth="420"
               maxWidth="420"
               maxHeight="360"
-
-
               StackPane.alignment="CENTER"
               style="-fx-background-color: white;
              -fx-background-radius: 18;
              -fx-padding: 22 22 20 22;
              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 20, 0, 0, 5);">
-
-
         <!-- ===== HEADER ===== -->
             <VBox spacing="4">
                 <Label text="Initial Administrator Setup"
                        style="-fx-font-size: 18px;
                       -fx-font-weight: bold;
                       -fx-text-fill: #034c81;"/>
-
                 <Label text="Create the primary admin account"
                        style="-fx-font-size: 12px;
                       -fx-text-fill: #7f858c;"/>
             </VBox>
-
             <Separator style="-fx-background-color: #e8e8e8;"/>
-
             <!-- ===== FORM ===== -->
             <VBox spacing="12">
-
                 <TextField fx:id="adminUsernameField"
                            promptText="Admin Username"
                            style="-fx-background-color: #f8f9fa;
@@ -198,7 +165,6 @@
                           -fx-border-radius: 8;
                           -fx-background-radius: 8;
                           -fx-font-size: 13px;"/>
-
                 <PasswordField fx:id="adminPasswordField"
                                promptText="Password"
                                style="-fx-background-color: #f8f9fa;
@@ -206,7 +172,6 @@
                               -fx-border-radius: 8;
                               -fx-background-radius: 8;
                               -fx-font-size: 13px;"/>
-
                 <PasswordField fx:id="adminConfirmField"
                                promptText="Confirm Password"
                                style="-fx-background-color: #f8f9fa;
@@ -215,19 +180,15 @@
                               -fx-background-radius: 8;
                               -fx-font-size: 13px;"/>
             </VBox>
-
             <!-- ===== ERROR ===== -->
             <Label fx:id="adminSetupErrorLabel"
                    visible="false"
                    managed="false"
                    style="-fx-text-fill: #ff6b6b;
                   -fx-font-size: 12px;"/>
-
             <Separator style="-fx-background-color: #e8e8e8;"/>
-
             <!-- ===== ACTIONS ===== -->
             <HBox spacing="10" alignment="CENTER_RIGHT">
-
                 <!-- Cancel -->
                 <Button text="Cancel"
                         onAction="#hideAdminSetup"
@@ -238,7 +199,6 @@
                        -fx-border-color: #e0e0e0;
                        -fx-border-radius: 18;
                        -fx-cursor: hand;"/>
-
                 <!-- Create -->
                 <Button text="Create Admin"
                         onAction="#handleCreateAdminOverlay"
@@ -250,10 +210,6 @@
                        -fx-cursor: hand;
                        -fx-effect: dropshadow(gaussian, rgba(44,163,250,0.35), 8, 0, 0, 2);"/>
             </HBox>
-
         </VBox>
-
-
     </StackPane>
-
 </HBox>

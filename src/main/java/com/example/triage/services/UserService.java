@@ -9,7 +9,6 @@ public class UserService {
 
     public static boolean isUserTableEmpty() {
         String sql = "SELECT COUNT(*) FROM users";
-
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
@@ -20,7 +19,6 @@ public class UserService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        return true; // Assume empty if error occurs
+        return true;
     }
 }

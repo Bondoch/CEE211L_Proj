@@ -1,3 +1,9 @@
 Manifest-Version: 1.0
 Main-Class: com.example.triage.Main
+Class-Path: javafx-graphics-21.0.6.jar ikonli-javafx-12.3.1.jar javafx-f
+ xml-21.0.6.jar javafx-fxml-21.0.6-win.jar protobuf-java-3.21.9.jar mysq
+ l-connector-j-8.0.33.jar javafx-base-21.0.6-win.jar javafx-controls-21.
+ 0.6-win.jar javafx-base-21.0.6.jar controlsfx-11.2.1.jar ikonli-fontawe
+ some5-pack-12.3.1.jar javafx-controls-21.0.6.jar ikonli-core-12.3.1.jar
+  javafx-graphics-21.0.6-win.jar
 

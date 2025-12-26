@@ -7,15 +7,11 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-import javafx.animation.FadeTransition;
-import javafx.util.Duration;
-
 import com.example.triage.database.Patient;
 import com.example.triage.database.PatientDAO;
 import com.example.triage.database.FacilityDAO;
 import com.example.triage.database.FloorDAO;
 import com.example.triage.database.SortMode;
-
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -30,12 +26,8 @@ public class PatientsController {
     @FXML private TextField addPatientDiagnosis;
     @FXML private ComboBox<String> addPatientGender;
     @FXML private ComboBox<String> addPatientSeverity;
-    // ===== ROOT STACK (for overlays / popups) =====
     @FXML private StackPane patientStack;
-
-
-
-
+    @FXML private ComboBox<String> editFacility;
     // ===== LEFT PANEL =====
     @FXML private ComboBox<String> facilityCombo;
     @FXML private ComboBox<String> floorCombo;
@@ -65,9 +57,7 @@ public class PatientsController {
     @FXML private ComboBox<String> editSeverity;
     @FXML private ComboBox<String> editFloor;
     @FXML private ComboBox<String> editUnit;
-
     @FXML private VBox referralContainer;
-
 
     private final PatientDAO patientDAO = new PatientDAO();
     private final FacilityDAO facilityDAO = new FacilityDAO();
@@ -81,7 +71,6 @@ public class PatientsController {
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("MMM dd, yyyy - hh:mm a");
 
-
     @FXML
     public void initialize() {
 
@@ -90,9 +79,6 @@ public class PatientsController {
             loadPatientsUnified();
         });
         severityBox.setDisable(true);
-
-
-
         facilityCombo.getItems().setAll(facilityDAO.getAllFacilities());
 
         facilityCombo.setOnAction(e -> {
@@ -107,13 +93,10 @@ public class PatientsController {
             }
         });
 
-
         severityBox.getItems().addAll("Moderate", "High", "Critical");
         severityToggle.selectedProperty().addListener((a,b,c)->loadPatientsUnified());
         severityBox.setOnAction(e -> loadPatientsUnified());
-
         searchField.textProperty().addListener((a,b,c)->loadPatientsUnified());
-
         sortByAdmissionBtn.setOnAction(e -> {
             sortByBedBtn.setSelected(false);
             currentSort = sortByAdmissionBtn.isSelected()
@@ -136,13 +119,11 @@ public class PatientsController {
                 "Female",
                 "Other"
         );
-
         addPatientSeverity.getItems().setAll(
                 "Moderate",
                 "High",
                 "Critical"
         );
-
     }
 
     private void renderReferralUI(Patient p) {
@@ -151,26 +132,27 @@ public class PatientsController {
         String status = p.getReferralStatus();
         boolean isAdmin = PermissionService.isAdminOrDoctor();
 
-        // ===== PENDING STATE =====
+    /* ===============================
+       PENDING STATE
+       =============================== */
         if ("PENDING".equals(status)) {
 
             Label title = new Label("Referral Pending");
             title.setStyle("""
-        -fx-font-size: 13px;
-        -fx-font-weight: bold;
-        -fx-text-fill: #ff9800;
-    """);
+            -fx-font-size: 13px;
+            -fx-font-weight: bold;
+            -fx-text-fill: #ff9800;
+        """);
 
             Label target = new Label(
                     p.getReferralFacility() + " (Floor " + p.getReferralFloor() + ")"
             );
             target.setStyle("""
-        -fx-font-size: 12px;
-        -fx-text-fill: #6b7280;
-    """);
+            -fx-font-size: 12px;
+            -fx-text-fill: #6b7280;
+        """);
 
             VBox pendingBox = new VBox(2, title, target);
-
             referralContainer.getChildren().add(pendingBox);
 
             if (isAdmin) {
@@ -180,42 +162,48 @@ public class PatientsController {
             return;
         }
 
+    /* ===============================
+       DEFAULT ACTIONS (Referral Button)
+       =============================== */
+        HBox actions = new HBox(10);
+        actions.setAlignment(Pos.CENTER_LEFT);
 
-        // ===== NO REFERRAL / DECLINED =====
+        Button referralBtn = createRequestButton(p);
+        actions.getChildren().add(referralBtn);
+
+        referralContainer.getChildren().add(actions);
+
+    /* ===============================
+       DECLINED MESSAGE (TEMPORARY)
+       =============================== */
         if ("DECLINED".equals(status)) {
 
             Label declined = new Label("Referral request was declined");
             declined.setStyle("""
-        -fx-text-fill: #d32f2f;
-        -fx-font-size: 12px;
-        -fx-font-weight: bold;
-    """);
+            -fx-text-fill: #d32f2f;
+            -fx-font-size: 12px;
+            -fx-font-weight: bold;
+        """);
 
             referralContainer.getChildren().add(declined);
-            return;
+
+            // Auto-remove message after 3 seconds
+            javafx.animation.PauseTransition delay =
+                    new javafx.animation.PauseTransition(
+                            javafx.util.Duration.seconds(3)
+                    );
+
+            delay.setOnFinished(e ->
+                    referralContainer.getChildren().remove(declined)
+            );
+            delay.play();
         }
-
-        // ===== NO REFERRAL (ONLY LOWER STAFF CAN REQUEST) =====
-        if ("NONE".equals(status)) {
-            HBox actions = new HBox(10);
-            actions.setAlignment(Pos.CENTER_LEFT);
-
-            actions.getChildren().add(createRequestButton(p));
-            referralContainer.getChildren().add(actions);
-        }
-
-
-
-
     }
-
 
 
     private Button createRequestButton(Patient p) {
         Button btn = new Button("Referral");
-
-        // icon (same visual scale as edit)
-        Label icon = new Label("↗"); // referral-style arrow
+        Label icon = new Label("↗");
         icon.setStyle("""
         -fx-font-size: 12px;
         -fx-text-fill: #034c81;
@@ -241,13 +229,8 @@ public class PatientsController {
         -fx-border-radius: 6;
         -fx-cursor: hand;
     """);
-
         return btn;
     }
-
-
-
-
 
     private Label createPendingIndicator() {
         Label label = new Label("Referral Pending");
@@ -262,11 +245,9 @@ public class PatientsController {
         Button accept = new Button("Accept");
         Button decline = new Button("Decline");
 
-        // Shared sizing
         accept.setPrefHeight(32);
         decline.setPrefHeight(32);
 
-        // Accept = primary (blue)
         accept.setStyle("""
         -fx-background-color: #1e88e5;
         -fx-text-fill: white;
@@ -275,7 +256,6 @@ public class PatientsController {
         -fx-cursor: hand;
     """);
 
-        // Decline = neutral / danger outline
         decline.setStyle("""
         -fx-background-color: #f5f5f5;
         -fx-text-fill: #d32f2f;
@@ -294,26 +274,18 @@ public class PatientsController {
         return box;
     }
 
-
     private void approveReferral(Patient p) {
         patientDAO.approveReferral(p.getId());
-        handleCloseDetail();     // ✅ close stale popup
-        loadPatientsUnified();  // ✅ reload fresh data
+        handleCloseDetail();
+        loadPatientsUnified();
     }
-
 
     private void declineReferral(Patient p) {
         patientDAO.declineReferral(p.getId());
 
-        showInlineMessage(
-                "Referral request declined.",
-                "-fx-text-fill: #d32f2f;"
-        );
-
-        handleCloseDetail();     // ✅ close stale popup
+        handleCloseDetail();
         loadPatientsUnified();
     }
-
 
 
     private void openReferralPopup(Patient p) {
@@ -327,8 +299,8 @@ public class PatientsController {
             controller.init(p, () -> {
                 patientStack.getChildren().remove(popup);
                 loadPatientsUnified();
-                loadPatientsUnified();   // refresh after request
-                handleCloseDetail();     // optional UX
+                loadPatientsUnified();
+                handleCloseDetail();
             });
 
             StackPane.setAlignment(popup, Pos.CENTER);
@@ -338,11 +310,6 @@ public class PatientsController {
             e.printStackTrace();
         }
     }
-
-
-
-
-
 
     private void loadPatientsUnified() {
 
@@ -409,9 +376,7 @@ public class PatientsController {
         detailAdmission.setText(
                 p.getAdmissionDate().toLocalDateTime().format(FORMATTER)
         );
-
-        renderReferralUI(p); // ✅ THIS WAS MISSING
-
+        renderReferralUI(p);
         detailBackdrop.setVisible(true);
         detailBackdrop.setManaged(true);
         patientDetailCard.setVisible(true);
@@ -419,40 +384,66 @@ public class PatientsController {
     }
 
     // ===== EDIT =====
-
     @FXML
     public void handleEditPatient() {
-
 
         if (!PermissionService.canEditSeverity()) {
             showPermissionDenied("You are not allowed to edit patient details.");
             return;
         }
-
-
+        // Basic fields
         editDiagnosis.setText(
                 patientDAO.getDiagnosisByPatientId(selectedPatientId)
         );
-
         editSeverity.getItems().setAll("Moderate", "High", "Critical");
         editSeverity.setValue(detailSeverity.getText());
 
-        boolean inpatient = detailBed.getText().toLowerCase().contains("room");
-        editFloor.setDisable(!inpatient);
-        editUnit.setDisable(!inpatient);
+        String fromType =
+                facilityDAO.getFacilityTypeByUnitId(selectedUnitId);
 
-        if (inpatient) {
-            int fid = facilityDAO.getFacilityIdByName(facilityCombo.getValue());
-            editFloor.getItems().setAll(floorDAO.getFloorsByFacility(fid));
+        boolean isAdminOrDoctor = PermissionService.isAdminOrDoctor();
+        boolean isNurseOrTech = PermissionService.isNurseOrTechnician();
 
-            editFloor.setOnAction(e -> {
-                int f = Integer.parseInt(editFloor.getValue().replaceAll("\\D+",""));
-                editUnit.getItems().setAll(
-                        patientDAO.getAvailableUnits(facilityCombo.getValue(), f)
-                );
-            });
+        editFacility.getItems().clear();
+        editFloor.getItems().clear();
+        editUnit.getItems().clear();
+
+        editFacility.setDisable(true);
+        editFloor.setDisable(true);
+        editUnit.setDisable(true);
+
+    /* ===============================
+       FACILITY DROPDOWN (PRIMARY)
+       =============================== */
+        if (isAdminOrDoctor) {
+            // Admin/Doctor: any facility
+            editFacility.getItems().setAll(
+                    facilityDAO.getAllFacilities()
+            );
+            editFacility.setDisable(false);
+
+        } else if (isNurseOrTech && "WARD".equalsIgnoreCase(fromType)) {
+            editFacility.getItems().setAll(
+                    facilityDAO.getFacilitiesByType("WARD")
+            );
+            editFacility.setDisable(false);
         }
 
+    /* ===============================
+       FLOOR DROPDOWN (SECONDARY)
+       =============================== */
+        editFacility.setOnAction(e -> {
+            String facility = editFacility.getValue();
+            if (facility == null) return;
+
+            int facilityId = facilityDAO.getFacilityIdByName(facility);
+
+            editFloor.getItems().clear();
+            editFloor.getItems().setAll(
+                    floorDAO.getFloorsByFacility(facilityId)
+            );
+            editFloor.setDisable(false);
+        });
         editBackdrop.setVisible(true);
         editBackdrop.setManaged(true);
         editPatientPopup.setVisible(true);
@@ -462,39 +453,63 @@ public class PatientsController {
     @FXML
     public void confirmEdit() {
 
+        String diagnosis = editDiagnosis.getText();
+        String severity = editSeverity.getValue();
+
         String fromType =
                 facilityDAO.getFacilityTypeByUnitId(selectedUnitId);
 
+        String targetFacility = editFacility.getValue();
+        String targetFloorLabel = editFloor.getValue();
+
         String toType = fromType;
 
-// Only check destination if a transfer is happening
-        if (!editUnit.isDisabled() && editUnit.getValue() != null) {
-            toType =
-                    facilityDAO.getFacilityTypeByUnitId(
-                            patientDAO.getUnitIdByLabel(editUnit.getValue())
-                    );
+        if (targetFacility != null) {
+            toType = facilityDAO.getFacilityTypeByName(targetFacility);
         }
-
+        // ===== PERMISSION CHECK =====
         if (!PermissionService.canTransfer(fromType, toType)) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Transfer Restricted");
             alert.setHeaderText("Action Not Allowed");
             alert.setContentText(
-                    "You are only allowed to transfer patients between inpatient wards."
+                    "Only doctors or admins can transfer patients outside ward facilities."
             );
             alert.showAndWait();
             return;
         }
+        // ===== AUTO-ASSIGN UNIT IF TRANSFERRING =====
+        Integer newUnitId = null;
 
+        if (targetFacility != null && targetFloorLabel != null) {
 
-        patientDAO.updatePatientEdit(
+            int floorNumber =
+                    Integer.parseInt(targetFloorLabel.replaceAll("\\D+", ""));
+
+            newUnitId = patientDAO.findAvailableUnit(
+                    targetFacility,
+                    floorNumber
+            );
+
+            if (newUnitId == null) {
+                Alert alert = new Alert(Alert.AlertType.WARNING);
+                alert.setTitle("No Available Unit");
+                alert.setHeaderText("Transfer Failed");
+                alert.setContentText(
+                        "No available beds found on the selected floor."
+                );
+                alert.showAndWait();
+                return;
+            }
+        }
+        // ===== APPLY UPDATE =====
+        patientDAO.updatePatientEditAutoAssign(
                 selectedPatientId,
                 selectedUnitId,
-                editDiagnosis.getText(),
-                editSeverity.getValue(),
-                editUnit.isDisabled() ? null : editUnit.getValue()
+                newUnitId,
+                diagnosis,
+                severity
         );
-
         editBackdrop.setVisible(false);
         editPatientPopup.setVisible(false);
         detailBackdrop.setVisible(false);
@@ -525,8 +540,6 @@ public class PatientsController {
             showPermissionDenied("You are not allowed to discharge patients.");
             return;
         }
-
-
         dischargeBackdrop.setVisible(true);
         dischargeBackdrop.setManaged(true);
         dischargePopup.setVisible(true);
@@ -599,7 +612,6 @@ public class PatientsController {
         loadPatientsUnified();
     }
 
-
     private void showPermissionDenied(String message) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Permission Denied");
@@ -619,6 +631,21 @@ public class PatientsController {
         referralContainer.getChildren().add(msg);
     }
 
+    private void showInlineEditWarning(String message) {
 
+        Label warning = new Label(message);
+        warning.setStyle("""
+        -fx-text-fill: #d32f2f;
+        -fx-font-size: 12px;
+        -fx-font-weight: bold;
+    """);
+        editPatientPopup.getChildren().removeIf(
+                n -> n instanceof Label && ((Label) n).getText().contains("transfer")
+        );
 
+        editPatientPopup.getChildren().add(
+                editPatientPopup.getChildren().size() - 1,
+                warning
+        );
+    }
 }

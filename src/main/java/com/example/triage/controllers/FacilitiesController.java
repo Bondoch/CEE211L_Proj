@@ -5,30 +5,21 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
-
 import java.sql.*;
 import java.util.*;
 import com.example.triage.database.DBConnection;
 
 public class FacilitiesController {
-
-    /* ================================
-       FXML REFERENCES
-       ================================ */
     @FXML private ComboBox<String> facilitySelector;
     @FXML private ComboBox<Integer> floorSelector;
-
     @FXML private FlowPane unitGrid;
     @FXML private VBox emptyState;
-
     @FXML private Label facilityTitle;
     @FXML private Label availableCount;
     @FXML private Label occupiedCount;
-
     @FXML private Button editFacilityBtn;
     @FXML private VBox editFacilityPanel;
     @FXML private ComboBox<String> facilityStatusBox;
-
     /* ADD FACILITY */
     @FXML private VBox addFacilityPanel;
     @FXML private TextField addFacilityName;
@@ -36,13 +27,7 @@ public class FacilitiesController {
     @FXML private Spinner<Integer> addFacilityFloors;
     @FXML private Spinner<Integer> addFacilityBeds;
     @FXML private Spinner<Integer> addFacilityRooms;
-    @FXML
-    private StackPane addFacilityOverlay;
-
-
-
-
-
+    @FXML private StackPane addFacilityOverlay;
     /* REMOVE FACILITY */
     @FXML private VBox removeFacilityPanel;
     @FXML private ComboBox<String> removeFacilitySelector;
@@ -52,17 +37,9 @@ public class FacilitiesController {
     @FXML private Spinner<Integer> removeRoomsSpinner;
     @FXML private StackPane deleteConfirmOverlay;
     @FXML private StackPane deleteBlockedOverlay;
-
     @FXML private Label deleteConfirmMessage;
     @FXML private Label deleteBlockedMessage;
     @FXML private VBox removeFacilityPopup;
-
-
-
-
-
-
-
     /* ================================
        STATE
        ================================ */
@@ -72,11 +49,6 @@ public class FacilitiesController {
     private int pendingBeds;
     private int pendingRooms;
 
-
-
-    /* ================================
-       INITIALIZATION
-       ================================ */
     @FXML
     public void initialize() {
 
@@ -99,7 +71,6 @@ public class FacilitiesController {
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 100, 0)
         );
 
-        /* 🔐 PERMISSION GATE — VIEW ONLY FOR NON-ADMINS */
         if (!PermissionService.canManageFacilities()) {
 
             // Disable mutation buttons
@@ -122,10 +93,6 @@ public class FacilitiesController {
             );
         }
     }
-
-
-
-
     /* ================================
        FACILITY / FLOOR LOADING
        ================================ */
@@ -140,15 +107,12 @@ public class FacilitiesController {
             while (rs.next()) {
                 facilitySelector.getItems().add(rs.getString("name"));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
     private void loadFloors(String facilityName) {
         floorSelector.getItems().clear();
-
         String sql = """
                 SELECT f.floor_number
                 FROM floors f
@@ -156,22 +120,17 @@ public class FacilitiesController {
                 WHERE fac.name = ?
                 ORDER BY f.floor_number
                 """;
-
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setString(1, facilityName);
             ResultSet rs = ps.executeQuery();
-
             while (rs.next()) {
                 floorSelector.getItems().add(rs.getInt("floor_number"));
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
     /* ================================
        DROPDOWN LOGIC
        ================================ */
@@ -182,27 +141,21 @@ public class FacilitiesController {
             if (facility != null) loadFloors(facility);
             clearView();
         });
-
         floorSelector.setOnAction(e -> renderUnits());
     }
-
     /* ================================
        UNIT RENDERING
        ================================ */
     private void renderUnits() {
         unitGrid.getChildren().clear();
-
         String facility = facilitySelector.getValue();
         Integer floor = floorSelector.getValue();
-
         if (facility == null || floor == null) {
             clearView();
             return;
         }
-
         emptyState.setVisible(false);
         facilityTitle.setText(facility + " - Floor " + floor);
-
         int available = 0;
         int occupied = 0;
 
@@ -220,7 +173,6 @@ public class FacilitiesController {
                     END,
                     CAST(SUBSTRING(u.label, LOCATE(' ', u.label) + 1) AS UNSIGNED)
                 """;
-
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
@@ -242,11 +194,9 @@ public class FacilitiesController {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         availableCount.setText(String.valueOf(available));
         occupiedCount.setText(String.valueOf(occupied));
     }
-
     private StackPane createUnitBox(int id, String labelText, String status) {
         Label label = new Label(labelText);
         label.setStyle("""
@@ -264,10 +214,8 @@ public class FacilitiesController {
                 renderUnits();
             }
         });
-
         return box;
     }
-
     private String getUnitStyle(String status) {
         return switch (status) {
             case "AVAILABLE" ->
@@ -278,7 +226,6 @@ public class FacilitiesController {
                     "-fx-background-color:#eeeeee;-fx-border-color:#9e9e9e;-fx-border-radius:8;";
         };
     }
-
     private void updateUnitStatus(int id, String status) {
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps =
@@ -291,7 +238,6 @@ public class FacilitiesController {
             e.printStackTrace();
         }
     }
-
     /* ================================
        EDIT MODE
        ================================ */
@@ -307,12 +253,10 @@ public class FacilitiesController {
             showPermissionDenied("Only administrators can manage facilities.");
             return;
         }
-
         editMode = true;
         editFacilityPanel.setVisible(true);
         editFacilityPanel.setManaged(true);
     }
-
     @FXML private void handleDoneEdit() {
         editMode = false;
         editFacilityPanel.setVisible(false);
@@ -322,20 +266,12 @@ public class FacilitiesController {
     private void closeAddFacilityPopup() {
         addFacilityOverlay.setVisible(false);
         addFacilityOverlay.setManaged(false);
-
-        // reset fields
         addFacilityName.clear();
         addFacilityType.setValue(null);
         addFacilityFloors.getValueFactory().setValue(1);
         addFacilityBeds.getValueFactory().setValue(0);
         addFacilityRooms.getValueFactory().setValue(0);
     }
-
-
-
-    /* ================================
-       ADD / REMOVE FACILITY
-       ================================ */
 
     @FXML
     private void handleAddFacility() {
@@ -344,15 +280,12 @@ public class FacilitiesController {
             showPermissionDenied("Only administrators can add facilities.");
             return;
         }
-
         addFacilityOverlay.setVisible(true);
         addFacilityOverlay.setManaged(true);
         removeFacilityPanel.setVisible(false);
         removeFacilityPanel.setManaged(false);
         Platform.runLater(() -> addFacilityName.requestFocus());
-
     }
-
     @FXML
     private void confirmAddFacility() {
 
@@ -363,10 +296,8 @@ public class FacilitiesController {
         int roomCount = addFacilityRooms.getValue();
 
         if (name == null || name.isBlank() || type == null) return;
-
         try (Connection conn = DBConnection.getConnection()) {
 
-            // 1️⃣ Insert facility
             PreparedStatement facPS = conn.prepareStatement(
                     "INSERT INTO facilities (name, type, bed_count, room_count) VALUES (?, ?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS
@@ -377,30 +308,23 @@ public class FacilitiesController {
             facPS.setInt(3, bedCount);
             facPS.setInt(4, roomCount);
             facPS.executeUpdate();
-
             ResultSet facKeys = facPS.getGeneratedKeys();
             if (!facKeys.next()) return;
-
             int facilityId = facKeys.getInt(1);
 
-            // 2️⃣ Floors
             for (int floor = 1; floor <= floors; floor++) {
-
                 PreparedStatement floorPS = conn.prepareStatement(
                         "INSERT INTO floors (facility_id, floor_number) VALUES (?, ?)",
                         Statement.RETURN_GENERATED_KEYS
                 );
-
                 floorPS.setInt(1, facilityId);
                 floorPS.setInt(2, floor);
                 floorPS.executeUpdate();
 
                 ResultSet floorKeys = floorPS.getGeneratedKeys();
                 if (!floorKeys.next()) continue;
-
                 int floorId = floorKeys.getInt(1);
 
-                // Beds (ER, WARD, ICU, PACU)
                 if (List.of("ER", "WARD", "ICU", "PACU").contains(type)) {
                     for (int b = 1; b <= bedCount; b++) {
                         conn.prepareStatement(
@@ -410,7 +334,6 @@ public class FacilitiesController {
                     }
                 }
 
-// Rooms (WARD ONLY)
                 if ("WARD".equals(type)) {
                     for (int r = 1; r <= roomCount; r++) {
                         conn.prepareStatement(
@@ -419,33 +342,25 @@ public class FacilitiesController {
                         ).executeUpdate();
                     }
                 }
-
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         loadFacilities();
-        closeAddFacilityPopup(); // whatever method you use
+        closeAddFacilityPopup();
     }
-
-
     @FXML
     private void handleRemoveFacility() {
-
         if (!PermissionService.canManageFacilities()) {
             showPermissionDenied("Only administrators can remove facilities.");
             return;
         }
-
         removeFacilityOverlay.setVisible(true);
         removeFacilityOverlay.setManaged(true);
-
         removeFacilitySelector.getItems().setAll(facilitySelector.getItems());
         removeFacilitySelector.setValue(null);
         removeFloorSelector.getItems().clear();
-
         removeBedsSpinner.setDisable(true);
         removeRoomsSpinner.setDisable(true);
         removeBedsSpinner.setValueFactory(
@@ -454,16 +369,13 @@ public class FacilitiesController {
         removeRoomsSpinner.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 0, 0)
         );
-
     }
     private void setupRemoveListeners() {
 
         removeFacilitySelector.setOnAction(e -> {
             String facility = removeFacilitySelector.getValue();
             removeFloorSelector.getItems().clear();
-
             if (facility == null) return;
-
             try (Connection conn = DBConnection.getConnection();
                  PreparedStatement ps = conn.prepareStatement("""
                  SELECT floor_number
@@ -472,10 +384,8 @@ public class FacilitiesController {
                  WHERE fac.name=?
                  ORDER BY floor_number
              """)) {
-
                 ps.setString(1, facility);
                 ResultSet rs = ps.executeQuery();
-
                 while (rs.next()) {
                     removeFloorSelector.getItems().add(rs.getInt("floor_number"));
                 }
@@ -483,47 +393,35 @@ public class FacilitiesController {
                 ex.printStackTrace();
             }
         });
-
         removeFloorSelector.setOnAction(e -> {
             String facility = removeFacilitySelector.getValue();
             Integer floor = removeFloorSelector.getValue();
             if (facility == null || floor == null) return;
-
             int beds = countUnits(facility, floor, "Bed");
             int rooms = countUnits(facility, floor, "Room");
-
             removeBedsSpinner.setValueFactory(
                     new SpinnerValueFactory.IntegerSpinnerValueFactory(0, beds, 0)
             );
             removeRoomsSpinner.setValueFactory(
                     new SpinnerValueFactory.IntegerSpinnerValueFactory(0, rooms, 0)
             );
-
             removeBedsSpinner.setDisable(beds == 0);
             removeRoomsSpinner.setDisable(rooms == 0);
         });
     }
-
     @FXML
     private void executeConfirmedDelete() {
-
         try (Connection conn = DBConnection.getConnection()) {
-
             PreparedStatement facPS =
                     conn.prepareStatement("SELECT id FROM facilities WHERE name=?");
             facPS.setString(1, pendingFacility);
             ResultSet rs = facPS.executeQuery();
             if (!rs.next()) return;
-
             int facilityId = rs.getInt("id");
-
-            // 🚫 BLOCK IF OCCUPIED
             if (hasOccupiedUnits(conn, facilityId, pendingFloor)) {
                 showDeleteBlocked();
                 return;
             }
-
-            // 🔥 DELETE LOGIC
             if (pendingFloor == null) {
                 conn.prepareStatement(
                         "DELETE FROM facilities WHERE id=" + facilityId
@@ -548,18 +446,15 @@ public class FacilitiesController {
                     deleteUnits(conn, floorId, "Room", pendingRooms);
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
         loadFacilities();
         clearView();
         closeAllDeletePopups();
     }
 
     private boolean hasOccupiedUnits(Connection conn, int facilityId, Integer floor) throws SQLException {
-
         String sql = """
         SELECT COUNT(*) 
         FROM units u
@@ -567,38 +462,26 @@ public class FacilitiesController {
         WHERE f.facility_id = ?
         AND u.status = 'OCCUPIED'
     """ + (floor != null ? " AND f.floor_number = ?" : "");
-
         PreparedStatement ps = conn.prepareStatement(sql);
         ps.setInt(1, facilityId);
-
         if (floor != null) {
             ps.setInt(2, floor);
         }
-
         ResultSet rs = ps.executeQuery();
         rs.next();
         return rs.getInt(1) > 0;
     }
-
-
-
-
-
 
     @FXML
     private void confirmRemoveFacility() {
 
         pendingFacility = removeFacilitySelector.getValue();
         pendingFloor = removeFloorSelector.getValue();
-
         Integer bedsVal = removeBedsSpinner.getValue();
         Integer roomsVal = removeRoomsSpinner.getValue();
-
         pendingBeds = bedsVal == null ? 0 : bedsVal;
         pendingRooms = roomsVal == null ? 0 : roomsVal;
-
         if (pendingFacility == null) return;
-
         deleteConfirmMessage.setText(
                 buildDeleteMessage(
                         pendingFacility,
@@ -607,18 +490,9 @@ public class FacilitiesController {
                         pendingRooms
                 )
         );
-
         showDeleteConfirm();
     }
 
-
-
-
-
-
-    /* ================================
-       HELPERS
-       ================================ */
     private void clearView() {
         unitGrid.getChildren().clear();
         emptyState.setVisible(true);
@@ -635,7 +509,6 @@ public class FacilitiesController {
              JOIN facilities fac ON fac.id=f.facility_id
              WHERE fac.name=? AND f.floor_number=? AND u.label LIKE ?
          """)) {
-
             ps.setString(1, facility);
             ps.setInt(2, floor);
             ps.setString(3, type + " %");
@@ -682,30 +555,25 @@ public class FacilitiesController {
         deleteConfirmOverlay.setVisible(true);
         deleteConfirmOverlay.setManaged(true);
     }
-
     private void showDeleteBlocked() {
         deleteBlockedOverlay.setVisible(true);
         deleteBlockedOverlay.setManaged(true);
     }
-
     @FXML
     private void closeDeleteConfirm() {
         deleteConfirmOverlay.setVisible(false);
         deleteConfirmOverlay.setManaged(false);
     }
-
     @FXML
     private void closeDeleteBlocked() {
         deleteBlockedOverlay.setVisible(false);
         deleteBlockedOverlay.setManaged(false);
     }
-
     private void closeAllDeletePopups() {
         closeDeleteConfirm();
         closeDeleteBlocked();
         closeRemoveFacilityPopup();
     }
-
     private String buildDeleteMessage(
             String facility,
             Integer floor,
@@ -721,25 +589,18 @@ public class FacilitiesController {
         } else {
             msg.append("All floors\n");
         }
-
         if (beds != null && beds > 0) {
             msg.append("Beds: ").append(beds).append("\n");
         }
-
         if (rooms != null && rooms > 0) {
             msg.append("Rooms: ").append(rooms).append("\n");
         }
-
         msg.append("\nThis action cannot be undone.");
-
         return msg.toString();
     }
-
     private void showPermissionDenied(String message) {
         deleteBlockedMessage.setText(message);
         deleteBlockedOverlay.setVisible(true);
         deleteBlockedOverlay.setManaged(true);
     }
-
-
 }

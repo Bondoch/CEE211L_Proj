@@ -19,9 +19,6 @@ import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
 import javafx.util.Duration;
 import java.util.prefs.Preferences;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-
 
 public class LoginController {
 
@@ -30,15 +27,12 @@ public class LoginController {
     @FXML private Label errorLabel;
     @FXML private HBox errorContainer;
     @FXML private CheckBox rememberMeCheckBox;
-
     @FXML private javafx.scene.layout.Pane adminSetupBackdrop;
     @FXML private javafx.scene.layout.VBox adminSetupCard;
-
     @FXML private TextField adminUsernameField;
     @FXML private PasswordField adminPasswordField;
     @FXML private PasswordField adminConfirmField;
     @FXML private Label adminSetupErrorLabel;
-
 
     private Preferences prefs = Preferences.userNodeForPackage(LoginController.class);
 
@@ -143,7 +137,6 @@ public class LoginController {
         }
     }
 
-
     private void loadDashboard() {
         FadeTransition fade = new FadeTransition(Duration.millis(300), usernameField.getScene().getRoot());
         fade.setFromValue(1.0);
@@ -247,7 +240,7 @@ public class LoginController {
             return;
         }
 
-        // 🔒 Admin already exists
+        // Admin already exists
         if (adminExists()) {
             showAdminError("Administrator setup has already been completed.");
             return;
@@ -262,7 +255,6 @@ public class LoginController {
             stmt.setString(2, password); // (hashing later if required)
             stmt.executeUpdate();
 
-            // ✅ Success
             hideAdminSetup();
             showError("Admin account created. You may now log in.");
 

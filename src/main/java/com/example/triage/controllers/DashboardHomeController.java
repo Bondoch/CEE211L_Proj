@@ -8,7 +8,6 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.*;
 import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.geometry.Insets;
-
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,13 +15,11 @@ import java.time.format.DateTimeFormatter;
 public class DashboardHomeController {
 
     @FXML private Label welcomeLabel;
-
     // Stat cards
     @FXML private Label adminStaffCountLabel;
     @FXML private Label adminPatientsCountLabel;
     @FXML private Label adminCriticalCountLabel;
     @FXML private Label adminBedsCountLabel;
-
     // Containers
     @FXML private VBox adminPanel;
     @FXML private VBox userPanel; // ignored on purpose

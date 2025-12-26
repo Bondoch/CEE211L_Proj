@@ -18,31 +18,23 @@
         -fx-border-color: #e0e0e0;
         -fx-border-radius: 14;
         -fx-cursor: hand;
-        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);
-      ">
-
+        -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2);">
     <!-- Patient Code + Severity -->
     <HBox alignment="CENTER_LEFT" spacing="8">
-
         <!-- Patient Code -->
         <TextFlow fx:id="codeFlow"
                   style="
                       -fx-font-size: 12px;
                       -fx-font-weight: bold;
-                      -fx-text-fill: #5f6368;
-                  "/>
-
+                      -fx-text-fill: #5f6368;"/>
         <Region HBox.hgrow="ALWAYS"/>
-
         <!-- Severity -->
         <Label fx:id="severityLabel"
                style="
                    -fx-padding: 3 10 3 10;
                    -fx-background-radius: 12;
                    -fx-font-size: 11px;
-                   -fx-font-weight: bold;
-               "/>
-
+                   -fx-font-weight: bold;"/>
         <Label fx:id="referralBadge"
                visible="false"
                managed="false"
@@ -52,11 +44,8 @@
            -fx-text-fill: #856404;
            -fx-font-size: 10px;
            -fx-padding: 3 8;
-           -fx-background-radius: 10;
-       "/>
-
+           -fx-background-radius: 10;"/>
     </HBox>
-
     <!-- Patient Name -->
     <HBox spacing="8" alignment="CENTER_LEFT">
         <FontIcon iconLiteral="fas-user" iconSize="14" iconColor="#2ca3fa"/>
@@ -65,29 +54,23 @@
                   style="
                       -fx-font-size: 15px;
                       -fx-font-weight: bold;
-                      -fx-text-fill: #034c81;
-                  "/>
+                      -fx-text-fill: #034c81;"/>
     </HBox>
-
     <!-- Age & Gender -->
     <Label fx:id="ageGenderLabel"
            style="
                -fx-font-size: 12px;
-               -fx-text-fill: #7f858c;
-           "/>
-
+               -fx-text-fill: #7f858c;"/>
     <!-- Unit -->
     <HBox spacing="8" alignment="CENTER_LEFT">
         <FontIcon iconLiteral="fas-bed" iconSize="14" iconColor="#7f858c"/>
         <Label fx:id="unitLabel"
                style="-fx-font-size: 12px; -fx-text-fill: #7f858c;"/>
     </HBox>
-
     <!-- Facility & Floor -->
     <HBox spacing="8" alignment="CENTER_LEFT">
         <FontIcon iconLiteral="fas-hospital" iconSize="14" iconColor="#7f858c"/>
         <Label fx:id="facilityFloorLabel"
                style="-fx-font-size: 12px; -fx-text-fill: #7f858c;"/>
     </HBox>
-
 </VBox>

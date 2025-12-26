@@ -7,7 +7,6 @@
             xmlns:fx="http://javafx.com/fxml"
             fx:controller="com.example.triage.controllers.StaffAccountsController"
             style="-fx-background-color: #f5f7fa;">
-
     <center>
         <StackPane fx:id="staffStack">
 
@@ -325,9 +324,6 @@
                     onAction="#hideAllPopups"/>
                 </HBox>
             </VBox>
-
-
-
         </StackPane>
     </center>
 </BorderPane>

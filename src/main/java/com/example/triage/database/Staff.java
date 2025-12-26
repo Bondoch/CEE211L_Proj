@@ -15,8 +15,6 @@ public class Staff {
         this.facility = facility;
         this.onShift = onShift;
     }
-
-
     public int getId() { return id; }
     public String getName() { return name; }
     public String getRole() { return role; }

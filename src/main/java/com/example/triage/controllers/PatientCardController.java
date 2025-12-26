@@ -9,26 +9,19 @@ import javafx.scene.text.TextFlow;
 
 public class PatientCardController {
 
-
     /* ===== ROOT ===== */
     @FXML private VBox root;
-
     /* ===== TEXT FLOWS (FOR HIGHLIGHTING) ===== */
     @FXML private TextFlow nameFlow;
     @FXML private TextFlow codeFlow;
-
     /* ===== OTHER LABELS ===== */
     @FXML private Label ageGenderLabel;
     @FXML private Label unitLabel;
     @FXML private Label severityLabel;
     @FXML private Label facilityFloorLabel;
-
     @FXML private Label referralBadge;
 
-
     private Patient patient;
-
-    /* ================= INITIALIZE ================= */
 
     @FXML
     public void initialize() {
@@ -37,7 +30,6 @@ public class PatientCardController {
                         + "-fx-border-color: #2ca3fa;"
                         + "-fx-effect: dropshadow(gaussian, rgba(44,163,250,0.35), 14, 0, 0, 4);")
         );
-
         root.setOnMouseExited(e ->
                 root.setStyle(root.getStyle()
                         .replace("-fx-border-color: #2ca3fa;", "")
@@ -47,27 +39,21 @@ public class PatientCardController {
                         ))
         );
     }
-
     /* ================= PUBLIC SETTER ================= */
-
     public void setPatient(
             Patient patient,
             String searchText,
             Runnable onClick
     ) {
         this.patient = patient;
-
-        // 🔍 Highlight name & patient code
         applyHighlight(nameFlow, patient.getFullName(), searchText);
         applyHighlight(codeFlow, patient.getPatientCode(), searchText);
 
-        // Other info
         ageGenderLabel.setText(patient.getAge() + " • " + patient.getGender());
         unitLabel.setText(patient.getUnitLabel());
         facilityFloorLabel.setText(
                 patient.getFacilityName() + " • Floor " + patient.getFloorNumber()
         );
-
         severityLabel.setText(capitalize(patient.getSeverity()));
         applySeverityStyle(patient.getSeverity());
 
@@ -79,11 +65,8 @@ public class PatientCardController {
                     + "-fx-background-color: #fff8e1;"
             );
         }
-
         root.setOnMouseClicked(e -> onClick.run());
     }
-
-    /* ================= HIGHLIGHT LOGIC ================= */
 
     private void applyHighlight(
             TextFlow flow,
@@ -96,7 +79,6 @@ public class PatientCardController {
             flow.getChildren().add(new Text(text));
             return;
         }
-
         String lowerText = text.toLowerCase();
         String lowerQuery = query.toLowerCase();
 
@@ -131,8 +113,6 @@ public class PatientCardController {
         }
     }
 
-    /* ================= SEVERITY STYLE ================= */
-
     private void applySeverityStyle(String severity) {
         switch (severity.toLowerCase()) {
             case "critical" -> severityLabel.setStyle(
@@ -149,7 +129,6 @@ public class PatientCardController {
             );
         }
     }
-
     private String capitalize(String s) {
         return (s == null || s.isEmpty())
                 ? ""

@@ -7,7 +7,6 @@ import com.example.triage.database.PatientDAO;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.VBox;
 
 public class ReferralPopupController {
 
@@ -43,8 +42,6 @@ public class ReferralPopupController {
             errorLabel.setManaged(false);
         });
     }
-
-
     @FXML
     private void submit() {
 
@@ -53,11 +50,8 @@ public class ReferralPopupController {
             errorLabel.setManaged(true);
             return;
         }
-
-        // hide error once valid
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
-
         patientDAO.requestReferral(
                 patient.getId(),
                 facilityBox.getValue(),
@@ -68,8 +62,6 @@ public class ReferralPopupController {
             onDone.run();
         }
     }
-
-
 
     @FXML
     private void cancel() {

@@ -7,18 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FloorDAO {
-
     public List<String> getFloorsByFacility(int facilityId) {
-
         List<String> floors = new ArrayList<>();
-
         String sql = """
             SELECT floor_number
             FROM floors
             WHERE facility_id = ?
             ORDER BY floor_number
         """;
-
         try (
                 Connection conn = DBConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(sql)
@@ -32,7 +28,6 @@ public class FloorDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return floors;
     }
 

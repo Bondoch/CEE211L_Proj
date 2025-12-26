@@ -132,14 +132,14 @@
 
             </GridPane>
 
-            <!-- ✨ Two Column Layout (Facility Status + Recent Activity) -->
+            <!--  Two Column Layout (Facility Status + Recent Activity) -->
             <GridPane hgap="20" vgap="20">
                 <columnConstraints>
                     <ColumnConstraints hgrow="ALWAYS"/>
                     <ColumnConstraints hgrow="ALWAYS"/>
                 </columnConstraints>
 
-                <!-- ✨ Facility Capacity Overview -->
+                <!--  Facility Capacity Overview -->
                 <VBox GridPane.columnIndex="0" spacing="15"
                       style="-fx-background-color: #ffffff;
                              -fx-background-radius: 12;
@@ -156,7 +156,7 @@
                     </VBox>
                 </VBox>
 
-                <!-- ✨ Recent Activity Feed -->
+                <!--  Recent Activity Feed -->
                 <VBox GridPane.columnIndex="1" spacing="15"
                       style="-fx-background-color: #ffffff;
                              -fx-background-radius: 12;
@@ -180,7 +180,7 @@
                 </VBox>
             </GridPane>
 
-            <!-- ✨ Critical Patients Alert Section -->
+            <!--  Critical Patients Alert Section -->
             <VBox fx:id="criticalPatientsSection" spacing="15"
                   style="-fx-background-color: #ffffff;
                          -fx-background-radius: 12;
