@@ -17,8 +17,6 @@ public class Main extends Application {
             FXMLLoader loader = new FXMLLoader(
                     getClass().getResource("/com/example/triage/views/login-view.fxml")
             );
-
-
             Parent root = loader.load();
 
             Scene scene = new Scene(root);
@@ -43,7 +41,6 @@ public class Main extends Application {
             e.printStackTrace();
         }
     }
-
     //  CLEAN SHUTDOWN
     @Override
     public void stop() {
@@ -51,7 +48,6 @@ public class Main extends Application {
         CapacityMonitor.getInstance().stopMonitoring();
         System.out.println("✅ Capacity monitoring stopped");
     }
-
     public static void main(String[] args) {
         launch();
     }
